@@ -29,6 +29,27 @@ Blink is handled by a separate process because it just seemed cleaner. The syste
 ---
 <!-- Copy the block above for each significant commit. -->
 
+### Entry � 2026-11-16
+**Commit reference:** `<!-- paste: git log --oneline -1 -->`
+8f91e15 (HEAD -> main, origin/main, origin/HEAD) Merge branch 'main' of https://github.com/philippevelha/electronics-lab-2026
+
+**What I implemented or decided:**
+<!-- 2�4 sentences. Be specific about architecture choices. -->
+Finished the first testbench (based on the first test in the handout sheet) and ran the system on it (passed with flying colors). Check blinking function only checks for one cycle of blinking because if it wasn't working it wouldn't turn on or it wouldn't turn off.
+
+**Why I structured it this way:**
+<!-- What alternatives did you consider? Why did you reject them? -->
+I looked at someone else's testbench for inspiration but they didn't use any asserts so I had to add them to mine. Also I did mainly procedures because it looks cleaner than whatever that other guy was doing.
+
+**What I am not sure about:**
+<!-- Honest uncertainty. Never graded for correctness � only for presence. -->
+
+**What the simulation or hardware told me I was wrong about:**
+<!-- Leave blank now. Fill in when you find out. Most important field. -->
+It told me I was right all along, ayyyyyyyyyyyyyyyyyyyyyyy.
+---
+<!-- Copy the block above for each significant commit. -->
+
 ## Post-submission reflection
 
 **What worked and why:**
