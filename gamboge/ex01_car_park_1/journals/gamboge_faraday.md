@@ -8,17 +8,18 @@
 
 ## Decision log
 
-### Entry — 2026-11-11
-**Commit reference:** `<!-- paste: git log --oneline -1 -->`
+### Entry — 2026-11-16 
+**Commit reference:** [REFLECT] Changed the file structure and added TODOS + 
+[IMPL] Added the files for datapath and FSM with skeleton.
 
 **What I implemented or decided:**
-<!-- 2–4 sentences. Be specific about architecture choices. -->
+I decided to divide the system in three files. One for the datapath, one for the Control unit (FSM) and one for the instantiation and connection of the signals.
 
 **Why I structured it this way:**
-<!-- What alternatives did you consider? Why did you reject them? -->
+I considered doing everything in one file, however, I think this division makes it easier to debug and to implement later. 
 
 **What I am not sure about:**
-<!-- Honest uncertainty. Never graded for correctness — only for presence. -->
+I'm not sure whether this is the best way to structure it in the end, since I haven't had direct experience yet. Going forward in the project will allow me to evaluate if this is the case, and provide insights also for later projects.
 
 **What the simulation or hardware told me I was wrong about:**
 <!-- Leave blank now. Fill in when you find out. Most important field. -->
