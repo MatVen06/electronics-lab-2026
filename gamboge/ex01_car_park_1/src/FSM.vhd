@@ -8,7 +8,8 @@ port(
 end FSM;
 
 architecture rtl of FSM is 
-
+    type state_t is (IDLE, WAIT_PASSWORD, WRONG_PASS, RIGHT_PASS, STOP);
+    signal state, next_state : state_t;
 begin
 -- TODO
 end architecture rtl;
