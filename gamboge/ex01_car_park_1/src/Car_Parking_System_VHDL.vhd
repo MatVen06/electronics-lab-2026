@@ -17,7 +17,17 @@ entity Car_Parking_Sytem_VHDL is
 
 
   architecture rtl of Car_Parking_System_VHDL is
-    type state_t is (IDLE, WAIT_PASSWORD, WRONG_PASS, RIGHT_PASS, STOP);
-    signal state, next_state : state_t;
+    -- TODO: definition of internal (state and control) signals
   begin
+  -- TODO: instantiation of datapath and FSM + connection of status and control signals
+
+    FSM : entity work.FSM
+    port map(
+      );
+
+    datapath : entity work.datapath
+    port map(
+      );
+      
+  end architecture rtl;
     
