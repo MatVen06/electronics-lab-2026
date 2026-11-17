@@ -116,11 +116,15 @@ begin
         check_hex(HEX_1,"0000110", "Hex 1 is not correct"); -- E
         check_hex(HEX_2, "0000110", "Hex 2 is not correct"); -- E
 
-        if HEX_1 /= "0000110" or HEX_2 /= "0101011" then -- wait for En (wait password)
-            wait until HEX_1 = "0000110" and HEX_2 = "0101011";
-        end if;
-        password_1 <= "01"; password_2 <= "10"; -- good pass
-        gap(10);
+        -- Slight modification to match new WRONG_PASS loop behaviour:
+        -- (stay in WRONG_PASS until right password is inputted)
+        gap(15);
+        check_hex(HEX_1,"0000110", "left WRONG_PASS with wrong password"); -- E
+        check_hex(HEX_2, "0000110", "left WRONG_PASS with wrong password"); -- E
+
+        password_1 <= "01"; 
+        password_2 <= "10"; -- good pass
+        gap(1); -- WRONG_PASS -> RIGHT_PASS on next clock edge
         check_blinking(GREEN_LED, "Green LED is not blinking", 10);
         check_hex(HEX_1,"0000010", "Hex 1 is not correct"); -- G
         check_hex(HEX_2, "1000000", "Hex 2 is not correct"); -- O
