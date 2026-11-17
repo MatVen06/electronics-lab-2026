@@ -31,9 +31,9 @@ begin
         elsif rising_edge(clk) then
             current_state <= next_state;
             
-            if current_state /= next_state then
+            if current_state /= next_state then -- reset counter on every state change
                 counter_wait <= 0;
-            elsif counter_wait < 10 then
+            elsif counter_wait < 10 then -- count up to 10 (used for WAIT_PASSWORD)
                 counter_wait <= counter_wait + 1;
             end if;
         end if;
@@ -49,10 +49,12 @@ begin
         HEX_2 <= (others => '1');
 
         case current_state is
+
         when IDLE =>
             if front_sensor = '1' then
                 next_state <= WAIT_PASSWORD;
             end if;
+
         when WAIT_PASSWORD =>
             RED_LED <= '1';
             HEX_1 <= "0000110"; -- E
@@ -65,22 +67,31 @@ begin
                     next_state <= WRONG_PASS;
                 end if;
             end if;
+
         when WRONG_PASS =>
             RED_LED <= red_tmp;
             HEX_1 <= "0000110"; -- E
             HEX_2 <= "0000110"; -- E
 
-            if counter_wait >= 10 then
-                next_state <= WAIT_PASSWORD;
+            -- Slight adjustment to match updated state diagram:
+            if password_1 = "01" and password_2 = "10" then -- Loop WRONG_PASS until correct password is inputted
+                next_state <= RIGHT_PASS;
             end if;
+
         when RIGHT_PASS => 
             GREEN_LED <= green_tmp;
             HEX_1 <= "0000010"; -- G
             HEX_2 <= "1000000"; -- O
 
+            -- matching updated state diagram: 
+            -- FIX: (before) logical issue when front & back = 0, would go to IDLE right away as car drove past
+            -- now stays in RIGHT_PASS as car drives by
             if front_sensor = '1' and back_sensor = '1' then
                 next_state <= STOP;
-            end if;
+            elsif front_sensor = '0' and back_sensor = '1' then -- car reached back sensor: gate cycle done
+                next_state <= IDLE;
+            end if; 
+
         when STOP => 
             RED_LED <= red_tmp;
             HEX_1 <= "0100100"; -- S
@@ -92,7 +103,8 @@ begin
         end case;
 
         -- if suddenly the car in front leaves, then return to idle state
-        if front_sensor = '0' and current_state /= STOP then
+        -- modified to exclude: RIGHT_PASS. Prevent override as car drives by and front = 0  but back is still not = 1
+        if front_sensor = '0' and current_state /= STOP and current_state /= RIGHT_PASS then 
             next_state <= IDLE;
         end if;
 
