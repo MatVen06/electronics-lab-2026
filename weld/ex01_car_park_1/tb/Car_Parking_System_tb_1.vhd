@@ -115,8 +115,13 @@ begin
         check_hex(HEX_1,"0000010", "Hex 1 is not correct"); -- G
         check_hex(HEX_2, "1000000", "Hex 2 is not correct"); -- O
 
-        back_sensor <= '1';
+        -- Logical condition we were ignoring before: car drives through: front sensor clears before the back sensor is reached
         front_sensor <= '0';
+        gap(3);
+        check_hex(HEX_1,"0000010", "left RIGHT_PASS while car between sensors"); -- G
+        check_hex(HEX_2, "1000000", "left RIGHT_PASS while car between sensors"); -- O
+
+        back_sensor <= '1'; -- car reaches back sensor
         gap(1);
 
         -- check that state is IDLE
