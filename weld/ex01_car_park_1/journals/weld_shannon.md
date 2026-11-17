@@ -22,6 +22,7 @@ Blink is handled by a separate process because it just seemed cleaner. The syste
 
 **What I am not sure about:**
 <!-- Honest uncertainty. Never graded for correctness � only for presence. -->
+Not much.
 
 **What the simulation or hardware told me I was wrong about:**
 <!-- Leave blank now. Fill in when you find out. Most important field. -->
@@ -43,6 +44,29 @@ I looked at someone else's testbench for inspiration but they didn't use any ass
 
 **What I am not sure about:**
 <!-- Honest uncertainty. Never graded for correctness � only for presence. -->
+I feel pretty confident about this one.
+
+**What the simulation or hardware told me I was wrong about:**
+<!-- Leave blank now. Fill in when you find out. Most important field. -->
+It told me I was right all along, ayyyyyyyyyyyyyyyyyyyyyyy.
+---
+<!-- Copy the block above for each significant commit. -->
+
+### Entry � 2026-11-17
+**Commit reference:** `<!-- paste: git log --oneline -1 -->`
+1a49c6e (HEAD -> main, origin/main, origin/HEAD) Merge branch 'main' of https://github.com/philippevelha/electronics-lab-2026
+
+**What I implemented or decided:**
+<!-- 2�4 sentences. Be specific about architecture choices. -->
+I finished all of the test benches, which was pretty easy because I already did the first one and i just had to tweak a few things. I did have a few issues with timing that I did manage to fix.
+
+**Why I structured it this way:**
+<!-- What alternatives did you consider? Why did you reject them? -->
+Because I already did it for the first one. If it ain't broke, don't fix it.
+
+**What I am not sure about:**
+<!-- Honest uncertainty. Never graded for correctness � only for presence. -->
+I feel pretty confident about this one.
 
 **What the simulation or hardware told me I was wrong about:**
 <!-- Leave blank now. Fill in when you find out. Most important field. -->
