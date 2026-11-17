@@ -1,4 +1,0 @@
-preferred_case = "lower"
-
-[libraries]
-lib.files = ['*.vhdl']
