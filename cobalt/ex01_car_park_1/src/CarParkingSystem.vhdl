@@ -37,8 +37,12 @@ begin
     begin
         -- Asynchronous, active-low reset
         if reset_n = '0' then
-            state   <= S_IDLE;
-            counter <= 0;
+            state     <= S_IDLE;
+            counter   <= 0;
+            GREEN_LED <= '0';
+            RED_LED   <= '0';
+            HEX_1     <= DISPLAY_OFF;
+            HEX_2     <= DISPLAY_OFF;
         elsif rising_edge(clk) then
             case state is
                 when S_IDLE =>
