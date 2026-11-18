@@ -21,6 +21,10 @@ architecture Car_Park of Car_Parking_System_VHDL is
     signal state   : state_t;
     signal counter : integer range 0 to 9;
 
+    -- Correct password
+    constant CORRECT_PASSWORD_1 : std_logic_vector(1 downto 0) := "01";
+    constant CORRECT_PASSWORD_2 : std_logic_vector(1 downto 0) := "10";
+
 begin
     clock : process(clk) is
     begin
@@ -40,12 +44,11 @@ begin
                 when S_WAIT_PASSWORD =>
                     --TODO Red LED ON steady, display says "En"
 
-                    -- Check for password every 10 clock cycles
-                    if counter = 9 and (password_1 = "01" and password_2 = "10") then
-                        state   <= S_RIGHT_PASSWORD;
-                        counter <= 0;
-                    elsif counter = 9 and (password_1 /= "01" or password_2 /= "10") then
-                        if password_1 /= "00" and password_2 /= "00" then
+                    -- Check for password after 10 clock cycles
+                    if counter = 9 then
+                        if password_1 = CORRECT_PASSWORD_1 and password_2 = CORRECT_PASSWORD_2 then
+                            state <= S_RIGHT_PASSWORD;
+                        else
                             state <= S_WRONG_PASSWORD;
                         end if;
                         counter <= 0;
