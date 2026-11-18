@@ -1,0 +1,7 @@
+v 4
+file / "C:\Users\Filip\OneDrive\Desktop\electronics-lab-2026\woad\ex01_car_park_1\src\benchmark_woad.vhd" "0d6c34781b1931e83c273e48b4a80753a829701d" "20261118130249.081":
+  entity testbench at 2( 2) + 0 on 13;
+  architecture simulation of testbench at 8( 85) + 0 on 14;
+file / "C:\Users\Filip\OneDrive\Desktop\electronics-lab-2026\woad\ex01_car_park_1\src\Car_Parking_system.vhd" "9477b759614142d152242cd81d91410fc1279a17" "20261118130237.539":
+  entity car_parking_system_vhdl at 1( 0) + 0 on 11;
+  architecture fsm of car_parking_system_vhdl at 19( 605) + 0 on 12;
