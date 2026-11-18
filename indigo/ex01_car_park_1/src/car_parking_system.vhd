@@ -33,7 +33,8 @@ architecture rtl of Car_Parking_System_VHDL is
   signal tick : natural range 0 to 255;
 
   signal stable : boolean := true; -- true if password is stable (not changing) for 1 clock cycle
-                                   -- DISPLAY CONSTANTS
+
+  -- DISPLAY CONSTANTS
   constant HEX_OFF : std_logic_vector(6 downto 0) := "1111111";
   constant HEX_E   : std_logic_vector(6 downto 0) := "0000110";
   constant HEX_n   : std_logic_vector(6 downto 0) := "0101011";
@@ -77,8 +78,8 @@ begin
         if password_1'event or password_2'event then
           stable <= false; -- password is changing
         else
-          if stable = true and tick >= 10 then
-            if (password_1 and password_2) = TRUE_PASSWORD then
+          if tick >= 10 then
+            if stable = true and (password_1 & password_2) = TRUE_PASSWORD then
               next_state <= RIGHT_PASSWORD;
             else
               next_state <= WRONG_PASSWORD;
