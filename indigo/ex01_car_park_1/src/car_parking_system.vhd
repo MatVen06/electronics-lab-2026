@@ -32,10 +32,8 @@ architecture rtl of Car_Parking_System_VHDL is
   -- tick counter: counts clock cycles spent in the current state
   signal tick : natural range 0 to 255;
 
-  signal stable       : boolean := true;        -- true if password is stable (not changing) for 1 clock cycle
-  signal counter_tick : natural range 0 to 255; -- counts clock cycles spent in stable state
-
-  -- DISPLAY CONSTANTS
+  signal stable : boolean := true; -- true if password is stable (not changing) for 1 clock cycle
+                                   -- DISPLAY CONSTANTS
   constant HEX_OFF : std_logic_vector(6 downto 0) := "1111111";
   constant HEX_E   : std_logic_vector(6 downto 0) := "0000110";
   constant HEX_n   : std_logic_vector(6 downto 0) := "0101011";
@@ -55,8 +53,6 @@ begin
     elsif rising_edge(clk) then
       current_state <= next_state;
 
-      counter_tick <= counter_tick + 1; -- increment stable_tick counter
-
       if next_state /= current_state then
         tick <= 0; -- restart counting on every state change
       elsif tick < tick'high then
@@ -75,43 +71,36 @@ begin
         if front_sensor = '1' then
           next_state <= WAIT_PASSWORD;
           stable <= true; -- password is stable at the beginning of WAIT_PASSWORD
-          counter_tick <= 0; -- reset stable_tick counter
         end if;
 
       when WAIT_PASSWORD =>
         if password_1'event or password_2'event then
           stable <= false; -- password is changing
         else
-          if stable = true and counter_tick >= 10 then
+          if stable = true and tick >= 10 then
             if (password_1 and password_2) = TRUE_PASSWORD then
               next_state <= RIGHT_PASSWORD;
-              counter_tick <= 0; -- reset counter
             else
               next_state <= WRONG_PASSWORD;
-              counter_tick <= 0; -- reset counter
             end if;
           end if;
         end if;
         if front_sensor = '0' then
           next_state <= IDLE;
-          counter_tick <= 0; -- reset counter
         end if;
       when WRONG_PASSWORD =>
         if tick >= 20 then
           next_state <= WAIT_PASSWORD;
           stable <= true; -- password is stable at the beginning of WAIT_PASSWORD
-          counter_tick <= 0; -- reset stable_tick counter
         end if;
         if front_sensor = '0' then
           next_state <= IDLE;
-          counter_tick <= 0; -- reset counter
         end if;
       when RIGHT_PASSWORD =>
         if back_sensor = '1' and front_sensor = '1' then
           next_state <= STOP;
-          counter_tick <= 0; -- reset counter
         else
-          if back_sensor = '0' and counter_tick >= 10 then
+          if back_sensor = '0' and tick >= 10 then
             next_state <= IDLE;
           end if;
         end if;
