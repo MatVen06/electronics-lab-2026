@@ -1,6 +1,6 @@
-# Journal — Exercise 1 — Car Park 1
+# Journal ï¿½ Exercise 1 ï¿½ Car Park 1
 
-> **You:** `cobalt_tesla` · **Group:** `cobalt` · **Opened:** 2026-11-11
+> **You:** `cobalt_tesla` ï¿½ **Group:** `cobalt` ï¿½ **Opened:** 2026-11-11
 > The code in this folder is shared with your group. **This journal is yours alone.**
 > Write entries as you work, not after the fact.
 
@@ -8,23 +8,26 @@
 
 ## Decision log
 
-### Entry — 2026-11-11
+### Entry ï¿½ 2026-11-18
 **Commit reference:** `<!-- paste: git log --oneline -1 -->`
 
 **What I implemented or decided:**
-<!-- 2–4 sentences. Be specific about architecture choices. -->
+I used a counter that goes from 0 to 9 to count clock cycles.
+I used a default password "00" "00" to remain inside WAIT_PASS when nothing was inputted instead of going to wrong password
+I also decided to wait 5 clock cycles inside WRONG_PASS to keep the DISPLAY and the LEDs that signal "wrong password" on
 
 **Why I structured it this way:**
-<!-- What alternatives did you consider? Why did you reject them? -->
+Having it go from 0 to 9 and reset whenever it's needed is useful since unexpected behaviour can be more easily caught when the counter goes over 9 (which is never intended)
+The default password makes it so the WRONG_PASS state doesn't trigger immediately if the user still hasn't inputted anything
+Waiting 5 clock cycles inside WRONG_PASS gives time to the user to see the LEDs and display, altough the number of cycles can be adjusted in the future
 
 **What I am not sure about:**
-<!-- Honest uncertainty. Never graded for correctness — only for presence. -->
+I am still a bit unsure on how VHDL handles unassigned variables and overflows of ranged variable, for that reason I have refrained from using anything of the sort
 
 **What the simulation or hardware told me I was wrong about:**
 <!-- Leave blank now. Fill in when you find out. Most important field. -->
 
 ---
-<!-- Copy the block above for each significant commit. -->
 
 ## Post-submission reflection
 
