@@ -209,6 +209,140 @@ begin
     cycles(2);
     expect_idle("S1 end");
 
+    -- Scenario 2
+    report "Scenario 2: wrong password, then correct password";
+    do_reset("S2");
+    
+    clear_password;                         -- wrong password -> "00 00"
+    front_sensor <= '1';
+    cycles(1);                              -- E1: IDLE -> WAIT_PASSWORD
+    expect_wait("S2 car detected");
+    cycles(9);                              -- E10: still in WAIT_PASSWORD
+    expect_wait("S2 10th wait cycle");       
+    cycles(1);                             
+    expect_wrong("S2 wrong password");
+
+    password_1 <= PASS_1; 
+    password_2 <= PASS_2;                   -- now the correct password
+    cycles(1);
+    expect_right("S2 correct password after wrong one");
+
+    clear_password;
+    front_sensor <= '0';                   -- car has passed the front sensor
+    back_sensor  <= '1';
+    cycles(1);
+    expect_idle("S2 back sensor");
+    back_sensor <= '0';
+    cycles(2);
+    expect_idle("S2 end");
+  
+    -- Scenario 3
+    report "Scenario 3: multiple cars (-> STOP state)";
+    do_reset("S3");
+
+    -- car 1 enters with the correct password
+    correct_password;
+    front_sensor <= '1';
+    cycles(11);                             -- E1..E11
+    expect_right("S3 car 1 granted");
+    clear_password;
+    front_sensor <= '0';
+    cycles(2);
+    expect_right("S3 car 1 between sensors");
+
+    -- car 2 arrives at the front sensor while car 1 is at the back sensor
+    front_sensor <= '1';
+    back_sensor  <= '1';
+    cycles(1);
+    expect_stop("S3 second car waiting");
+
+    -- a wrong password does not release car 2
+    password_1 <= "11";
+    password_2 <= "11";
+    cycles(2);
+    expect_stop("S3 wrong password in STOP");
+
+    -- car 1 has left the back sensor, still stopped until the password
+    back_sensor <= '0';
+    clear_password;
+    cycles(2);
+    expect_stop("S3 car 1 gone, car 2 not yet released");
+
+    -- car 2 enters the correct password
+    correct_password;
+    cycles(1);
+    expect_right("S3 car 2 granted");
+    clear_password;
+    front_sensor <= '0';
+    cycles(2);
+    expect_right("S3 car 2 between sensors");
+    back_sensor <= '1';
+    cycles(1);
+    expect_idle("S3 car 2 passed");
+    back_sensor <= '0';
+    cycles(2);
+    expect_idle("S3 end");
+
+    -- Scenario 4
+    report "Scenario 4: reset";
+
+    -- 4a: reset in the middle of WAIT_PASSWORD
+    do_reset("S4a");
+    correct_password;
+    front_sensor <= '1';
+    cycles(6);
+    expect_wait("S4a before reset");
+    async_reset("S4a reset in WAIT_PASSWORD");
+
+    -- the wait counter must have been reset: a new car waits 10 cycles again
+    correct_password;
+    front_sensor <= '1';
+    cycles(1);                              -- E1
+    expect_wait("S4a new car detected");
+    cycles(9);                              -- E10
+    expect_wait("S4a counter restarted");
+    cycles(1);                              -- E11
+    expect_right("S4a new car granted");
+    clear_password;
+    front_sensor <= '0';
+    cycles(1);
+
+    -- 4b: reset in WRONG_PASSWORD
+    do_reset("S4b");
+    clear_password;
+    front_sensor <= '1';
+    cycles(11);
+    expect_wrong("S4b before reset");
+    async_reset("S4b reset in WRONG_PASSWORD");
+
+    -- 4c: reset in RIGHT_PASSWORD
+    do_reset("S4c");
+    correct_password;
+    front_sensor <= '1';
+    cycles(11);
+    expect_right("S4c before reset");
+    async_reset("S4c reset in RIGHT_PASSWORD");
+
+    -- 4d: reset in STOP
+    do_reset("S4d");
+    correct_password;
+    front_sensor <= '1';
+    cycles(11);                             -- RIGHT_PASSWORD
+    clear_password;
+    back_sensor <= '1';
+    cycles(1);                              -- STOP
+    expect_stop("S4d before reset");
+    async_reset("S4d reset in STOP");
+
+    -- end 
+    if errors = 0 then
+      report "TEST PASSED (0 errors)";
+    else
+      report "TEST FAILED: " & integer'image(errors) & " check error(s)"
+        severity failure;
+    end if;
+    done <= true;
+    wait;
   end process;
 
 end architecture;

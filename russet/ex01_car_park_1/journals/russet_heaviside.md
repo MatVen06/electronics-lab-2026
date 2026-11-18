@@ -9,7 +9,7 @@
 ## Decision log
 
 ### Entry � 2026-11-11
-**Commit reference:** `<!-- paste: git log --oneline -1 -->`
+**Commit reference:** 8e5b907 `<!-- paste: git log --oneline -1 -->`
 
 **What I implemented or decided:**
 - read scenario and tasks 
@@ -55,6 +55,11 @@
 
 ---
 <!-- Copy the block above for each significant commit. -->
+### Entry � 2026-11-18
+**Commit reference:**  `<!-- paste: git log --oneline -1 -->`
+
+**What I implemented or decided:**
+We worked on the testbench scenarios 2 & 3
 
 ## Post-submission reflection
 
