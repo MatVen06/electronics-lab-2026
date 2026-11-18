@@ -44,7 +44,7 @@ architecture cp of Car_Parking_System_VHDL is
                 blink_phase <= '0';
             elsif rising_edge(clk) then 
                 state <= next_state;
-                blink_ohase <= not blink_phase;
+                blink_phase <= not blink_phase;
 
                 if state = WAIT_PASSWORD then 
                     if counter = 10 then
