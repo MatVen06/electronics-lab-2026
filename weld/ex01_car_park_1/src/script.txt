@@ -1,0 +1,8 @@
+Script to run the test benches:
+
+(Run from ex01_car_park_1 Parent folder)
+(make sure to change the # to the tb to be tested)
+
+ghdl -c src\Car_Parking_System_VHDL.vhd tb\Car_Parking_System_tb_#.vhd -r car_parking_system_tb_# --vcd=tb#.vcd
+
+Then manually drag the vcd file to the tb directory
