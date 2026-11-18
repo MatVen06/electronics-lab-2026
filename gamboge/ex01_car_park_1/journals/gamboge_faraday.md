@@ -27,6 +27,23 @@ I'm not sure whether this is the best way to structure it in the end, since I ha
 ---
 <!-- Copy the block above for each significant commit. -->
 
+### Entry — 2026-11-18 
+**Commit reference:** [IMPL] Implementation of the FSM. 
+
+**What I implemented or decided:**
+Starting from the FSM that we have drawn on paper last wednesday, I wrote the code for the FSM while my groupmates checked and tested the logic. I decided to create three separate processes for states, next states and outputs. I decided to encode the control signals for the two displays independently using a 3-bit gray code. We decided together to make the led blink for three clock cycles, using a counter in the datapath (to be implemented).
+
+**Why I structured it this way:**
+I used three processes to decouple the code and have an easier time debugging and finding out what breaks later. I decided to use two independent 3-bit gray codes to minimize the bits used and to avoid glitches.
+
+**What I am not sure about:**
+I'm not sure if using two 3-bit codes is the best idea or if there are better alternatives, also considering the future structure of the datapath.
+
+**What the simulation or hardware told me I was wrong about:**
+<!-- Leave blank now. Fill in when you find out. Most important field. -->
+
+---
+
 ## Post-submission reflection
 
 **What worked and why:**
