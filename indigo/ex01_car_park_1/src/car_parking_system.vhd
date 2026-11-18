@@ -56,7 +56,7 @@ begin
 
       if next_state /= current_state then
         tick <= 0; -- restart counting on every state change
-      elsif tick < tick'high then
+      elsif tick < 255 then
         tick <= tick + 1;
       end if;
 
