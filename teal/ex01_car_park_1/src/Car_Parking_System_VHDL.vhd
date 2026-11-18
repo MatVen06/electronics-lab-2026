@@ -128,5 +128,7 @@ begin
                     counter_wait <= std_logic_vector(unsigned(counter_wait) + 1);
                         
                 end if;
+            end case;
+        end if;
     end process;
 end arch ;
