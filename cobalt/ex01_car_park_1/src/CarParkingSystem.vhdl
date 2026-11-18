@@ -68,13 +68,13 @@ begin
                 when S_RIGHT_PASSWORD =>
                     --TODO Green LED blinks, display says "GO"
 
-                    -- If front sensor is off then go to idle
-                    if front_sensor = '0' then
-                        state <= S_IDLE;
-
                     -- If both sensors are on at the same time go to stop
-                    elsif front_sensor = '1' and back_sensor = '1' then
+                    if front_sensor = '1' and back_sensor = '1' then
                         state <= S_STOP;
+
+                    -- If the car reaches the back sensor (and no second car is waiting) go to idle
+                    elsif back_sensor = '1' then
+                        state <= S_IDLE;
                     end if;
                 when S_STOP =>
                     --TODO Red LED blinks, display says "SP"
