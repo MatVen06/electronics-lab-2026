@@ -26,13 +26,13 @@ architecture Car_Park of Car_Parking_System_VHDL is
     constant CORRECT_PASSWORD_2 : std_logic_vector(1 downto 0) := "10";
 
 begin
-    clock : process(clk) is
+    clock : process(clk, reset_n) is
     begin
-        if rising_edge(clk) then
-            if reset_n = '0' then
-                state   <= S_IDLE;
-                counter <= 0;
-            end if;
+        -- Asynchronous, active-low reset
+        if reset_n = '0' then
+            state   <= S_IDLE;
+            counter <= 0;
+        elsif rising_edge(clk) then
             case state is
                 when S_IDLE =>
                     --TODO LEDs and display OFF
