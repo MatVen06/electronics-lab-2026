@@ -83,36 +83,20 @@ begin
 
             if (state = wait_password) then 
                 enable_red <= '1';
-                enable_green <= '0';
                 hex1_display <= "001"; -- E
                 hex2_display <= "001"; -- n
             elsif (state = right_pass) then
-                if (clk = '1') then
-                    enable_green <= '1';
-                elsif (clk = '0') then
-                    enable_green <= '0';
-                end if;
-                enable_red <= '0';
+                enable_green <= clk; -- blink with clk
                 hex1_display <= "011"; -- G
                 hex2_display <= "101"; -- O
             elsif (state = wrong_pass) then
-                enable_green <= '0';
+                enable_red <= clk; -- blink with clk
                 hex1_display <= "001"; -- E
                 hex2_display <= "011"; -- E
-                if (clk = '1') then
-                    enable_red <= '1';
-                elsif (clk = '0') then
-                    enable_red <= '0';
-                end if;
             elsif (state = stop) then
+                enable_red <= clk; -- blink with clk
                 hex1_display <= "010"; -- S
                 hex2_display <= "100"; -- P
-                enable_green <= '0';
-                if (clk = '1') then
-                    enable_red <= '1';
-                elsif (clk = '0') then
-                    enable_red <= '0';
-                end if;
             end if;
         end process outputs;
                 
