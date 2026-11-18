@@ -18,8 +18,8 @@ architecture first of CPS_tb is
     signal password_2   : std_logic_vector(1 downto 0);
     signal GREEN_LED    : std_logic;
     signal RED_LED      : std_logic;
-    signal HEX_1        : std_logic;
-    signal HEX_2        : std_logic;
+    signal HEX_1        : std_logic_vector(6 downto 0);
+    signal HEX_2        : std_logic_vector(6 downto 0);
 
 begin
 
