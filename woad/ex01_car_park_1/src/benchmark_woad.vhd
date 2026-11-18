@@ -1,5 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use std.env.finish;
 
 entity testbench is
 end entity;
@@ -18,6 +19,7 @@ architecture simulation of testbench is
     signal RED_LED : std_logic;
     signal HEX_1 : std_logic_vector(6 downto 0);
     signal HEX_2 : std_logic_vector(6 downto 0);
+    signal stop : std_logic:='0';
 
     constant clock_period : time := 10 ns;
 
@@ -39,7 +41,8 @@ begin
         );
 
     -- Clock generation: 10 ns period (100 MHz)
-    clk <= not clk after clock_period / 2;
+    clk <= not clk after clock_period/2;
+
 
     -- Stimulus process
     stimulus : process
@@ -163,8 +166,14 @@ begin
         wait for 2*clock_period;
 
         report "--- Simulation Finished Successfully ---";
-        wait;
+        finish; --requires to compile with --std=08 attached
 
     end process;
 
 end architecture;
+
+/*
+ghdl -a --std=08 .\Car_Parking_system.vhd .\benchmark_woad.vhd
+ghdl -e --std=08 testbench
+ghdl -r --std=08 testbench --vcd=simulation.vcd 
+*/
