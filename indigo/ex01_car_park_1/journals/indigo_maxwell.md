@@ -84,6 +84,75 @@ I went back to separating the clocked logic from the combinational logic after t
 There are still a lot of caveats in the logic, expecially the synced counters and the stability check. I am not sure if the `counter_tick` is incremented correctly, or if it should be reset in other states than WAIT_PASSWORD.
 
 **What the simulation or hardware told me I was wrong about:**
+
+---
+### Entry - 2026-11-18
+**Commit reference:** `fc4b0d4 [DOCS]: Update journal entries.`
+
+**What I implemented or decided:**
+Besides the journal update, this commit also changed the RTL:
+- RIGHT_PASSWORD: goes to STOP when both `front_sensor` and `back_sensor` are high (a second car arrives while the first is passing); goes back to IDLE when `back_sensor` is low and `counter_tick >= 10`.
+- STOP: goes back to IDLE once `back_sensor` goes low.
+- In `DATA_PATH`, `counter_tick` is now incremented unconditionally instead of only while the password is stable in WAIT_PASSWORD.
+- `OUTPUTS` is now sensitive to `tick` as well as `current_state`, so the blinking LEDs actually update, and the "display off" default uses the `HEX_OFF` constant.
+
+**Why I structured it this way:**
+I wanted all five states implemented so the first scenario in `indigo_laplace`'s testbench could run end to end. `OUTPUTS` reads `tick` for blinking, so leaving it out of the sensitivity list was a bug.
+
+**What I am not sure about:**
+
+**What the simulation or hardware told me I was wrong about:**
+
+---
+### Entry - 2026-11-18
+**Commit reference:** `4bd990e [FIX]: fix tick counter`
+
+**What I implemented or decided:**
+I removed `counter_tick` completely. WAIT_PASSWORD (10 cycles) and RIGHT_PASSWORD (10 cycles) now use the same `tick` counter as WRONG_PASSWORD, which already restarts on every state change in `DATA_PATH`.
+
+**Why I structured it this way:**
+After `fc4b0d4` the two counters did the same job, and `counter_tick` was driven from both `DATA_PATH` and `FSM`. One counter that is only written in the clocked process is simpler and avoids multiple drivers. This also answers the question from my `8edf9f0` entry about where `counter_tick` should be reset: it no longer needs to be.
+
+**What I am not sure about:**
+`stable` is still assigned inside the combinational `FSM` process and not in every branch.
+
+**What the simulation or hardware told me I was wrong about:**
+
+---
+### Entry - 2026-11-18
+**Commit reference:** `19336b3 [FIX]: fix stable check in wait password`
+
+**What I implemented or decided:**
+Two fixes in WAIT_PASSWORD:
+- The password was built with `password_1 and password_2`, which is a bitwise AND of two 2-bit vectors (a 2-bit result) and can never equal the 4-bit `TRUE_PASSWORD`. I changed it to concatenation, `password_1 & password_2`.
+- The decision is now taken as soon as `tick >= 10`: if the password was stable and correct we go to RIGHT_PASSWORD, otherwise to WRONG_PASSWORD. Before, an unstable password made the FSM wait in WAIT_PASSWORD forever.
+
+**Why I structured it this way:**
+The `and` was a typo for `&`. Moving `stable` inside the check guarantees the FSM always leaves WAIT_PASSWORD after 10 cycles.
+
+**What I am not sure about:**
+The stability check uses `password_1'event` / `password_2'event` inside a combinational process. I am not sure if that will work on the testbench, though I will have to wait for the testbench to be done.
+
+**What the simulation or hardware told me I was wrong about:**
+
+---
+### Entry - 2026-11-18
+**Commit reference:** `191cf1e [IMPL]: finish first implemetation and delete duplicate tb`
+
+**What I implemented or decided:**
+- I replaced `tick < tick'high` with `tick < 255` in `DATA_PATH`.
+- I deleted my skeleton testbench `src/tb_car_parking_system.vhd` (from `dca582a`). `tb/tb_car_parking_system.vhd` by `indigo_laplace` is now the only testbench.
+- This is the first complete implementation: all five states and their outputs.
+
+To run the simulation I use a local `script.sh` (not committed) that compiles `src/car_parking_system.vhd` and `tb/tb_car_parking_system.vhd` with GHDL (`--std=08`), runs `tb_car_parking_system` for 10 us, and writes the waveform to `out.vcd`.
+
+**Why I structured it this way:**
+GHDL rejects `tick'high` ("object prefix must be an array"): on a scalar, `'high` has to be applied to a type or subtype, not to a signal.
+
+**What I am not sure about:**
+
+**What the simulation or hardware told me I was wrong about:**
+
 ---
 
 ## Post-submission reflection
