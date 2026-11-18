@@ -77,11 +77,14 @@ It told me I was right all along, ayyyyyyyyyyyyyyyyyyyyyyy.
 ## Post-submission reflection
 
 **What worked and why:**
+I don't know what to say here. Everything? because I checked and debugged and coded my way to victory.
 
 **What I would change and why:**
 <!-- Be specific. Reference commit hashes. -->
+Why would I submit something that I didn't think was complete?
 
 **What assumption did I carry in from the previous exercise that I had to revise here:**
 <!-- Required from Exercise 2 onward. -->
 
 **What part of this was my own contribution, and what did I learn from a teammate:**
+The vhdl design was from my own previous exercises, the testbenches were inspired by solutions I found online (that I did not save =/).
