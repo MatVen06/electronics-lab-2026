@@ -14,7 +14,7 @@ port( clk : in std_logic;
         RED_LED : out std_logic;
         HEX_1 : out std_logic_vector(6 downto 0); 
         HEX_2 : out std_logic_vector(6 downto 0);
-        car_count: out integer:=0
+        
         );
 end Car_Parking_System_VHDL;
 
@@ -48,7 +48,7 @@ end component;
     signal en_green_led : std_logic:='0';
     signal en_red_led : std_logic:='0';
     signal count : integer := 0;
-
+    signal car_count: integer := 0;
 
     function is_pass_correct(pw1 : std_logic_vector(1 downto 0); pw2 : std_logic_vector(1 downto 0)) return boolean is
     begin
