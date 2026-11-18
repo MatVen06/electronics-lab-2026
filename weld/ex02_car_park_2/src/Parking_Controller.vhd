@@ -259,5 +259,13 @@ begin
         end if;
     end process;
 
+    indicators: process(car_count, payment_accepted_Gout1, payment_accepted_Gout2)
+    begin
+        display <= int_to_7_seg(PARKING_CAPACITY - car_count);
 
+        Green_Light <= '1' when car_count < PARKING_CAPACITY else '0';
+        Red_Light <= not Green_Light;
+
+        payment_accepted <= payment_accepted_Gout1 or payment_accepted_Gout2;
+    end process;
 end architecture rtl;
