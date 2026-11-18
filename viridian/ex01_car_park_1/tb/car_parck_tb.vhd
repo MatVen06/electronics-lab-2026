@@ -10,20 +10,20 @@ architecture first of CPS_tb is
     constant clk_hz : integer := 100;
     constant time   : time    := 1000 ms/clk_hz;
 
-    signal clk          : in std_logic := '0';
-    signal reset_n      : in std_logic := '1';
-    signal front_sensor : in std_logic; 
-    signal back_sensor  : in std_logic;
-    signal password_1   : in std_logic;
-    signal password_2   : in std_logic;
-    signal GREEN_LED    : out std_logic;
-    signal RED_LED      : out std_logic;
-    signal HEX_1        : out std_logic;
-    signal HEX_2        : out std_logic;
+    signal clk          : std_logic := '0';
+    signal reset_n      : std_logic := '1';
+    signal front_sensor : std_logic; 
+    signal back_sensor  : std_logic;
+    signal password_1   : std_logic_vector(1 downto 0);
+    signal password_2   : std_logic_vector(1 downto 0);
+    signal GREEN_LED    : std_logic;
+    signal RED_LED      : std_logic;
+    signal HEX_1        : std_logic;
+    signal HEX_2        : std_logic;
 
 begin
 
-    DUT: entity work.Car_Parking_System_VHDL()
+    DUT: entity work.Car_Parking_System_VHDL
     port map(
         clk => clk,
         reset_n => reset_n,
@@ -42,7 +42,11 @@ begin
     SEQUENCER_PROC : process is
     begin
       
-        
+      reset_n <= '0';
+      front_sensor <= '0';
+      back_sensor <= '0';
+      password_1 <= "00";
+      password_2  <= "00";
 
     end process;
 end architecture;

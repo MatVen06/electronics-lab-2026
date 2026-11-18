@@ -43,7 +43,7 @@ end component;
     type FSM_States is (IDLE, WAIT_PASSWORD, WRONG_PASS, RIGHT_PASS, STOP, TIMEOUT);
     signal current_state : FSM_States;
     --Counter
-    signal counter_wait : std_logic_vector(7 downto 0):= "00000000";
+    signal counter_wait : std_logic_vector(3 downto 0):= "0000";
     signal prescaled_clock: std_logic:='0';
     signal en_green_led : std_logic:='0';
     signal en_red_led : std_logic:='0';
@@ -53,9 +53,82 @@ end component;
     function is_pass_correct(pw1 : std_logic_vector(1 downto 0); pw2 : std_logic_vector(1 downto 0)) return boolean is
     begin
         if(pw1="01" and pw2="10") then
-            return = false;
-        else
             return true;
+        else
+            return false;
         end if;
     end function;
+begin
+    --Prescaler instance
+    DUT_Prescaler: prescaler
+        generic map(
+            divider => 2 -- Set to 2 for testing purposes, halves the clock frequency
+        )
+        port map(
+            clk_in => clk,
+            reset => reset_n,
+            clk_out => prescaled_clock
+        );
+    --LED blocks
+     DUT: led_block
+        port map (
+            clock => prescaled_clock,
+            en => en_green_led,
+            led_out => GREEN_LED
+        );
+    DUT2: led_block
+        port map (
+            clock => prescaled_clock,
+            en => en_red_led,
+            led_out => RED_LED
+        );
+    process(clk, reset_n) is
+    begin
+        if(reset_n='0') then
+            current_state <= IDLE;
+            counter_wait <="0000";
+            HEX_1 <= "1111111"; --off
+            HEX_2 <= "1111111"; --off
+            GREEN_LED <= '0';
+            RED_LED <= '0';
+            en_green_led <= '0';
+            en_red_led <= '0';
+        elsif(rising_edge(clk)) then
+        --default
+            HEX_1 <= "1111111"; --off
+            HEX_2 <= "1111111"; --off
+            GREEN_LED <= '0';
+            RED_LED <= '0';
+            en_green_led <= '0';
+            en_red_led <= '0';
+            case current_state is
+                --idle state
+                when IDLE =>
+                    if front_sensor = '1' then
+                        current_state <= WAIT_PASSWORD;
+                    end if;
+                --wait pass
+                when WAIT_PASSWORD =>
+                RED_LED <= '1';
+                HEX_1 <= "0000110"; --E
+                HEX_2 <= "0101011"; --n 
+                if unsigned(counter_wait)>=9 then
+                    counter_wait<="0000";
+                    if (password_1 = "00" and password_2 = "00") then
+                        --no password entered go to IDLE
+                        current_state <= TIMEOUT;
+                    else
+                        if (is_pass_correct(password_1, password_2)) then
+                            current_state <= RIGHT_PASS;
+                        else
+                            current_state <= WRONG_PASS;
+                        end if;
+                    end if;
+                else
+                    counter_wait <= std_logic_vector(unsigned(counter_wait) + 1);
+                        
+                end if;
+            end case;
+        end if;
+    end process;
 end arch ;
