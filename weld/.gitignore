@@ -16,7 +16,7 @@
 # GHDL / ModelSim artifacts
 *.o
 *.cf
-*.vcd
+# *.vcd
 *.ghw
 *.wlf
 
