@@ -9,7 +9,7 @@
 ## Decision log
 
 ### Entry � 2026-11-18
-**Commit reference:** `<!-- paste: git log --oneline -1 -->`
+**Commit reference:** `7a2d693 [IMPL] State logic to architecture`
 
 **What I implemented or decided:**
 I used a counter that goes from 0 to 9 to count clock cycles.
