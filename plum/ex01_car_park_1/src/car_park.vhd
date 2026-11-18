@@ -14,7 +14,7 @@ entity Car_Parking_System_VHDL is
         GREEN_LED : out std_logic; 
         RED_LED : out std_logic; 
         HEX_1 : out std_logic_vector(6 downto 0);-- segments gfedcba 
-        HEX_2 : out std_logic_vector(6 downto 0); 
+        HEX_2 : out std_logic_vector(6 downto 0)
 
     );
 end Car_Parking_System_VHDL;
@@ -40,7 +40,7 @@ architecture CPS of Car_Parking_System_VHDL is
 begin 
     clock   : process(reset_n,next_state)
     begin
-        if  reset_n = '1' then
+        if  reset_n = '0' then
             current_state  <= Idle;
 
             GREEN_LED <= '0';
