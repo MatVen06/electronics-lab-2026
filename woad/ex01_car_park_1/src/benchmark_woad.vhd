@@ -82,9 +82,12 @@ begin
         back_sensor <= '0';
         wait for 7 * clock_period; 
 
-        -- Reset passwords for next scenario
+        -- Reset for next scenario
+        reset_n <= '0';
         password_1 <= "00";
         password_2 <= "00";
+        wait for clock_period;
+        reset_n <= '1';
         wait for 5 * clock_period;
 
         -------------------------------------------------------------
@@ -106,15 +109,60 @@ begin
         -- 4. Observe blinking red LED in S_WRONG_PASS for a few cycles (> 5 cycles)
         wait for 7 * clock_period;
 
-        -- 5. Clear sensor to reset system cleanly
+        -- 5. correct password
+        password_1 <= "10";
+        password_2 <= "01";
+
+        -- 4. Observe RIGHT_PASS
+        wait for 7 * clock_period;
+
+        -- 6. Clear sensor to reset system cleanly
         front_sensor <= '0';
         wait for 10 * clock_period;
 
-        report "--- Simulation Finished Successfully ---";
-
+        -- Reset for next scenario
+        reset_n <= '0';
+        password_1 <= "00";
+        password_2 <= "00";
+        wait for clock_period;
+        reset_n <= '1';
+        wait for 5 * clock_period;
+        
         -------------------------------------------------------------
         -- SCENARIO 3: Multiple cars
         -------------------------------------------------------------
+        report "--- Starting scenario 3: Multiple Cars ---";
+        -- 1. Car arrives at the front sensor
+        front_sensor <= '1';
+        wait for 2 * clock_period;
+
+        -- 2. Enter correct password BEFORE counter reaches 10
+        password_1 <= "10";
+        password_2 <= "01";
+
+        -- 3. Wait for transitions to S_RIGHT_PASS
+        wait for 9 * clock_period; 
+
+        -- 4. Car passes through the sensors but got a car behind
+        wait for clock_period;
+        back_sensor <= '1';
+        --5. second car imput wrong password
+        password_1 <= "00";
+        password_2 <= "00";
+
+        -- 6. triggers S_WRONG_PASS
+        wait for 9 * clock_period;
+
+        -------------------------------------------------------------
+        -- SCENARIO 4: Reset
+        -------------------------------------------------------------
+        report "--- Starting scenario 4: Reset ---";
+        reset_n <= '0';
+        front_sensor <= '0';
+        back_sensor <= '0';
+        wait for 2*clock_period;
+
+        report "--- Simulation Finished Successfully ---";
         wait;
 
     end process;
