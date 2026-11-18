@@ -55,15 +55,7 @@ begin
     elsif rising_edge(clk) then
       current_state <= next_state;
 
-      if current_state = WAIT_PASSWORD then
-        if stable = true then
-          counter_tick <= counter_tick + 1;
-        else
-          counter_tick <= 0; -- reset stable_tick counter if password is changing
-        end if;
-      else
-        counter_tick <= 0; -- reset stable_tick counter in other states
-      end if;
+      counter_tick <= counter_tick + 1; -- increment stable_tick counter
 
       if next_state /= current_state then
         tick <= 0; -- restart counting on every state change
@@ -114,24 +106,33 @@ begin
           next_state <= IDLE;
           counter_tick <= 0; -- reset counter
         end if;
-
       when RIGHT_PASSWORD =>
-      -- TODO
+        if back_sensor = '1' and front_sensor = '1' then
+          next_state <= STOP;
+          counter_tick <= 0; -- reset counter
+        else
+          if back_sensor = '0' and counter_tick >= 10 then
+            next_state <= IDLE;
+          end if;
+        end if;
+
       when STOP =>
-      -- TODO
+        if back_sensor = '0' then
+          next_state <= IDLE;
+        end if;
     end case;
   end process;
 
   -----------------------------------------------------------------------------
   -- Combinational output logic
   -----------------------------------------------------------------------------
-  OUTPUTS: process (current_state)
+  OUTPUTS: process (current_state, tick)
   begin
     -- defaults: LEDs off, displays off
     GREEN_LED <= '0';
     RED_LED <= '0';
-    HEX_1 <= "1111111";
-    HEX_2 <= "1111111";
+    HEX_1 <= HEX_OFF;
+    HEX_2 <= HEX_OFF;
 
     case current_state is
       when IDLE =>
