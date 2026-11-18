@@ -1,0 +1,193 @@
+{
+  "extensionVersion": "1.6.1",
+  "fileName": "d:\\VHDL_Code\\LABS\\electronics-lab-2026\\weld\\ex01_car_park_1\\tb\\tb1.vcd",
+  "markerTime": 225739062,
+  "altMarkerTime": null,
+  "displayTimeUnit": "fs",
+  "selectedSignal": {
+    "name": "car_parking_system_tb_1.hex_1",
+    "msb": 6,
+    "lsb": 0
+  },
+  "zoomRatio": 0.0000028218421523032,
+  "scrollLeft": 0,
+  "defaultPixelTime": 100000000,
+  "displayedSignals": [
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 0,
+      "name": "clk",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "clk",
+      "renderType": "binary",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 2,
+      "name": "front_sensor",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "front_sensor",
+      "renderType": "binary",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 3,
+      "name": "back_sensor",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "back_sensor",
+      "renderType": "binary",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 10,
+      "name": "done",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "done",
+      "renderType": "binary",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 6,
+      "name": "green_led",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "green_led",
+      "renderType": "binary",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 7,
+      "name": "red_led",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "red_led",
+      "renderType": "binary",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 8,
+      "name": "hex_1",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "hexadecimal",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "hex_1",
+      "renderType": "multiBit",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 9,
+      "name": "hex_2",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "hexadecimal",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "hex_2",
+      "renderType": "multiBit",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 4,
+      "name": "password_1",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "hexadecimal",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "password_1",
+      "renderType": "multiBit",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 5,
+      "name": "password_2",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "hexadecimal",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "password_2",
+      "renderType": "multiBit",
+      "valueLinkEnable": false
+    },
+    {
+      "dataType": "netlist-variable",
+      "netlistId": 1,
+      "name": "reset_n",
+      "scopePath": [
+        "car_parking_system_tb_1"
+      ],
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "rowHeight": 1,
+      "verticalScale": 1,
+      "nameType": "fullPath",
+      "customName": "reset_n",
+      "renderType": "binary",
+      "valueLinkEnable": false
+    }
+  ]
+}

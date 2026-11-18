@@ -1,6 +1,6 @@
-# Journal — Exercise 1 — Car Park 1
+# Journal ï¿½ Exercise 1 ï¿½ Car Park 1
 
-> **You:** `russet_faraday` · **Group:** `russet` · **Opened:** 2026-11-11
+> **You:** `russet_faraday` ï¿½ **Group:** `russet` ï¿½ **Opened:** 2026-11-11
 > The code in this folder is shared with your group. **This journal is yours alone.**
 > Write entries as you work, not after the fact.
 
@@ -8,17 +8,17 @@
 
 ## Decision log
 
-### Entry — 2026-11-11
-**Commit reference:** `<!-- paste: git log --oneline -1 -->`
+### Entry ï¿½ 2026-11-11
+**Commit reference:** `8e5b907 journal entry & tb draft`
 
 **What I implemented or decided:**
-<!-- 2–4 sentences. Be specific about architecture choices. -->
+Worked together with heaviside on her computer, and she made the commit. Implemented the FSM for the car parking system with five states (IDLE, WAIT_PASSWORD, WRONG_PASSWORD, RIGHT_PASSWORD, STOP). Implemented the outputs so that they depend on state only.
 
 **Why I structured it this way:**
-<!-- What alternatives did you consider? Why did you reject them? -->
+The wait counter and the blinking are handles once, outside the individual states to keep the state logic simpler
 
 **What I am not sure about:**
-<!-- Honest uncertainty. Never graded for correctness — only for presence. -->
+Whether our interpetation of the task is correct, for example the blinking speed and the 10-cycle wait
 
 **What the simulation or hardware told me I was wrong about:**
 <!-- Leave blank now. Fill in when you find out. Most important field. -->

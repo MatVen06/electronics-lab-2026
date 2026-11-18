@@ -22,8 +22,8 @@ architecture sim of tb_car_parking_system is
   -- OUTPUTS
   signal GREEN_LED : std_logic;
   signal RED_LED   : std_logic;
-  signal HEX_1     : std_logic_vector(6 downto 0); --
-  signal HEX_2     : std_logic_vector(6 downto 0); --
+  signal HEX_1     : std_logic_vector(6 downto 0); --segment gfedcba first letter
+  signal HEX_2     : std_logic_vector(6 downto 0); --segments gfedcba second letter
 
   signal done       : boolean := false;
   signal mon_errors : natural := 0;
@@ -64,8 +64,18 @@ begin
       HEX_1        => HEX_1,
       HEX_2        => HEX_2
     );
-  -- -------------------------------------------------------- stimulus --
-  stim: process
+  ---------------------------------------------------------- stimulus --
+  clk <= not clk after 5 ns; -- 100 MHz clock
+  
+  with (HEX_1 & HEX_2) select
+    st<= C_IDLE      when  "1111111" & "1111111", -- display off
+    C_WAIT_PASSWORD  when  "0000110" & "0101011", --En display
+    C_WRONG_PASSWORD when "0000110" & "0000110",  --EE display
+    C_RIGHT_PASSWORD when "0000010" & "1000000",  --GO display
+    C_STOP           when  "0100100" & "0001100", --SP display
+    "XXX"            when others;
+
+    stim: process
     variable errors : natural := 0;
     variable v      : std_logic_vector(6 downto 0); -- input vector to the DUT
     variable exp    : std_logic_vector(4 downto 0); -- expected outputs and next state from the reference model 3 outputs + 2 next state bits
@@ -80,26 +90,32 @@ begin
 
     procedure drive(x : std_logic_vector(6 downto 0)) is -- drive the DUT inputs with a vector of 7 bits
     begin
-      clk <= not clk after 500 ps; -- 100 MHz clock
+      
       reset_n <= x(6);
       front_sensor <= x(5);
       back_sensor <= x(4);
       password_1 <= x(3 downto 2);
       password_2 <= x(1 downto 0);
-      wait for 1 us; -- some time to let the dut settle beofre next vector
+      wait for 10 ns; -- some time to let the dut settle before next vector
     end procedure;
 
     procedure do_reset is
     begin
       report "-------------- Resetting the DUT --------------";
       reset_n <= '0';
-      wait for 1 us;
+      wait for 10 ns;
       reset_n <= '1';
-      wait for 1 us;
+      wait for 10 ns;
     end procedure;
 
+    procedure expect_state(target : std_logic_vector(2 downto 0); msg : string) is
+      begin
+        check(st = target,
+              msg & ": expected " & name(target) & ", got " & name(st));
+      end procedure;
+
     -- closed loop: wait for a state
-    procedure wait_state(target     : std_logic_vector(1 downto 0);
+    procedure wait_state(target     : std_logic_vector(2 downto 0);
                          max_cycles : natural;
                          usg        : string) is
     begin
@@ -107,21 +123,46 @@ begin
         if st = target then
           return;
         end if;
-        wait for 5 us;
+        wait for 10 ns;
       end loop;
-      -- if we get here, the state was not reached in time put a test here
+      expect_state(target, usg & "(timeout)");
     end procedure;
 
-    procedure expect_state(target : std_logic_vector(1 downto 0); msg : string) is
-    begin
-      check(st = target,
-            msg & ": expected " & name(target) & ", got " & name(st));
-    end procedure;
+    
 
   begin
 
+    report "Part A: scenario with a simple interaction"; --single car enter
+    drive("0000000");
+
+    drive("1000000"); --nothing changes
+    wait for 10 ns;
+    expect_state(C_IDLE, "Part A, 1");
+    report "===> Part A,1: idle state expected, got " & name(st);
+    --front sensor reveals a car and asks for the password
+    drive("1100110");
+    expect_state (C_WAIT_PASSWORD, "Part A,2");
+    report "===> Part A,2: writing password state expected, got " & name(st);
+    wait_state(C_RIGHT_PASSWORD, 12, "Part A,3"); --used wait_state instead of wait for 120ns (=12 clock cycles)+expect_state()
+    report "===> Part A,3: p1 and p2 are correct state expected, got " & name(st);
+    drive("1010110"); -- the car pass and the back sensor activates while the front one is no longer active
+    wait for 10 ns;
+    expect_state(C_IDLE, "Part A,4");
+    report "===> Part A,4: car get access state expected, got " & name(st);
+    drive("1000000"); --nothing changes
+    wait for 10 ns;
+    expect_state(C_IDLE, "Part A,5" );
+    report "===> Part A,5: idle state expected, got " & name(st);
+
+    report "Part B: scenario with wrong password";
+  
+    report "Part C: scenario with multiple cars";
+
+    report "Part D: reset";
+
+
     ---------------------------------------------------------------- summary
-    wait for 5 us;
+    wait for 10 ns;
     if errors + mon_errors = 0 then
       report "TEST PASSED (0 errors)";
     else
