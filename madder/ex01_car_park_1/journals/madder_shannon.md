@@ -14,11 +14,14 @@
 **What I implemented or decided:**
 <!-- 2–4 sentences. Be specific about architecture choices. -->
 designed the finite state machine diagram - nothing else important 
+completed the design vhd file started researching how to write proper testbenches. 
 
 **Why I structured it this way:**
+design vhd followed directly fropm the fsm and processes are easy to handle this way.
 <!-- What alternatives did you consider? Why did you reject them? -->
 
 **What I am not sure about:**
+i'm not sure why should we do separate testbenches for each senarios. 
 <!-- Honest uncertainty. Never graded for correctness — only for presence. -->
 
 **What the simulation or hardware told me I was wrong about:**
