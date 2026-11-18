@@ -107,7 +107,7 @@ begin
                     if front_sensor = '1' then
                         current_state <= WAIT_PASSWORD;
                     end if;
-                --wait pass
+                --wait pass state
                 when WAIT_PASSWORD =>
                 RED_LED <= '1';
                 HEX_1 <= "0000110"; --E
@@ -128,7 +128,73 @@ begin
                     counter_wait <= std_logic_vector(unsigned(counter_wait) + 1);
                         
                 end if;
+                --wrong pass state
+                when WRONG_PASS =>
+                en_red_led <= '1';
+                HEX_1 <= "0000110"; --E
+                HEX_2 <= "0000110"; --E 
+
+                if unsigned(counter_wait)>=9 then
+                    counter_wait<="0000";
+                    if (is_pass_correct(password_1, password_2)) then
+                        current_state <= RIGHT_PASS;
+                    else
+                        current_state <= WRONG_PASS;
+                    end if;
+                else
+                    counter_wait <= std_logic_vector(unsigned(counter_wait) + 1);
+                        
+                end if;
+                --right pass state
+                when RIGHT_PASS =>
+                en_green_led <= '1';
+                HEX_1 <= "0000010"; --6
+                HEX_2 <= "1000000"; --O 
+                if back_sensor = '1' then
+                    count <= count + 1;
+                    if front_sensor = '0' then
+                        --in this case it means the car has passed by
+                        current_state <= IDLE;
+                    else
+                        --case meaning queue
+                        current_state <= STOP;
+                    end if;
+                else
+                    if front_sensor = '0' then
+                        --case no car detected
+                        current_state <= IDLE;
+                        --case car is still in the parking so we do nothing
+                    end if;
+                end if;
+                --stop state
+                when STOP =>
+                en_red_led <= '1';
+                HEX_1 <= "0100100"; --S
+                HEX_2 <= "0001100"; --P
+                if unsigned(counter_wait)>=9 then
+                    --after 10 cycles go to IDLE and wait for new password
+                    counter_wait<="0000";
+                    current_state <= IDLE;
+                else
+                    --else increment counter and stay in STOP
+                    counter_wait <= std_logic_vector(unsigned(counter_wait) + 1);
+                end if;
+                --timeout
+                when TIMEOUT =>
+                RED_LED <= '1';
+                GREEN_LED <= '1';
+                if unsigned(counter_wait)>=9 then
+                    counter_wait<="0000";
+                    current_state <= IDLE;
+                else
+                    counter_wait <= std_logic_vector(unsigned(counter_wait) + 1);
+                        
+                end if;
+                when others =>
+                    current_state <= IDLE;
             end case;
         end if;
+        car_count <= count;
     end process;
+
 end arch ;
