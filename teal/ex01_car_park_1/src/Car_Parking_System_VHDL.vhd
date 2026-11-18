@@ -13,8 +13,7 @@ port( clk : in std_logic;
         GREEN_LED : out std_logic;
         RED_LED : out std_logic;
         HEX_1 : out std_logic_vector(6 downto 0); 
-        HEX_2 : out std_logic_vector(6 downto 0);
-        
+        HEX_2 : out std_logic_vector(6 downto 0)
         );
 end Car_Parking_System_VHDL;
 
