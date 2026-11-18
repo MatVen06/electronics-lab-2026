@@ -40,7 +40,7 @@ begin
     clk <= not clk after clk_period / 2;
 
     SEQUENCER_PROC : process is
-        variable blink :std_logic := 0;
+        variable blink :std_logic := '0';
     begin
       
       reset_n <= '0';
@@ -63,11 +63,11 @@ begin
       front_sensor <= '0';
       blink <= GREEN_LED;
       wait for 1/clk_hz;
-      assert (blink = not GREEN_LED)
+      assert (blink =  GREEN_LED)
         report "GREEN not closed";
       blink <= RED_LED;
-      wait for 1/clk_hz;
-      assert (blink = not RED_LED)
+      wait for 1/clk_hz s;
+      assert (blink = RED_LED)
         report "RED not closed";
       assert (HEX_1 = "1111111" and HEX_2 = "1111111")
         report "Wrong output";
