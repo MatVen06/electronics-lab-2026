@@ -11,6 +11,8 @@ port(
     clock_10 : in std_logic; -- status signal from the datapath = 1 if 10 clock cycles have elapsed.
     clock_3 : in std_logic; -- Status signal, 3 clock cycles to blink.
     check_pswd : in std_logic; -- status signal (1 if password is correct).
+    count_to_3 : out std_logic; -- control signal to start counting to 3.
+    count_to_10 : out std_logic; -- control signal to start counting to 10.
     enable_green : out std_logic; -- control signal to enable green led
     enable_red : out std_logic; -- control signal to enable red led
     -- Displays encoded independently
@@ -74,26 +76,41 @@ begin
         end process next_states;
 
 
-        outputs : process (state, clk) is
+        outputs : process (state, next_state, clk) is
         begin
                 enable_green <= '0';
                 enable_red <= '0';
                 hex1_display <= "000";
                 hex2_display <= "000";
+                -- Control signals for the datapath counters
+                count_to_3 <= '0';
+                count_to_10 <= '0';
 
             if (state = wait_password) then 
+                if (state = next_state) then
+                    count_to_10 <= '1';
+                end if;
                 enable_red <= '1';
                 hex1_display <= "001"; -- E
                 hex2_display <= "001"; -- n
             elsif (state = right_pass) then
+                if (next_state = state) then  
+                    count_to_3 <= '1';
+                end if;
                 enable_green <= clk; -- blink with clk
                 hex1_display <= "011"; -- G
                 hex2_display <= "101"; -- O
             elsif (state = wrong_pass) then
+                if (next_state = state) then 
+                    count_to_3 <= '1';
+                end if;
                 enable_red <= clk; -- blink with clk
                 hex1_display <= "001"; -- E
                 hex2_display <= "011"; -- E
             elsif (state = stop) then
+                if (state = next_state) then
+                    count_to_3 <= '1';
+                end if;
                 enable_red <= clk; -- blink with clk
                 hex1_display <= "010"; -- S
                 hex2_display <= "100"; -- P
@@ -101,3 +118,5 @@ begin
         end process outputs;
                 
 end architecture rtl;
+
+-- commit: added control signals to start the counters in the datapath.
