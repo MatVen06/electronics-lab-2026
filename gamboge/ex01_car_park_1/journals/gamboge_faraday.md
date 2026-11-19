@@ -44,6 +44,25 @@ I'm not sure if using two 3-bit codes is the best idea or if there are better al
 
 ---
 
+
+
+### Entry — 2026-11-19 
+**Commit reference:** [IMPL] Implementation of the display and the single counter for the datapath and logic for the LEDs. 
+
+**What I implemented or decided:**
+I implemented the display, the counter and the LEDs in the datapath. I decided to use only one 4-bit counter that can count either to 3 or to 10 depending on the control signal. I implemented the display with concurrent conditional assignments.
+
+**Why I structured it this way:**
+I decided to use one counter to simplify the logic. I kept the display outside a clocked process to avoid clutter code and prevent a 1-clock-cycle delay in the ouputs.
+
+**What I am not sure about:**
+I am not sure if using a buffer for the counter is the best idea. I find the logic to start and stop the counter a little bit heavy and perhaps it is not the best way to doit.
+
+**What the simulation or hardware told me I was wrong about:**
+<!-- Leave blank now. Fill in when you find out. Most important field. -->
+
+---
+
 ## Post-submission reflection
 
 **What worked and why:**
