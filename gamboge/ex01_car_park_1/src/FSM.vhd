@@ -119,4 +119,3 @@ begin
                 
 end architecture rtl;
 
--- commit: added control signals to start the counters in the datapath.
