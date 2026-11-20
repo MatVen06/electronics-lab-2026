@@ -17,7 +17,6 @@
 *.o
 *.cf
 *.vcd
-*.ghw
 *.wlf
 
 # OS / editor

@@ -1,0 +1,7 @@
+v 4
+file . "cp1testbench.vhd" "75a2748574fc77915493244acfa9a47d0b0e1fba" "20261118133437.750":
+  entity tb_car_parking at 1( 0) + 0 on 13;
+  architecture sim of tb_car_parking at 8( 123) + 0 on 14;
+file . "cp1.vhd" "a5e5ea118ef9e100576fa1cbc4dd5419e35ea72e" "20261118133427.226":
+  entity car_parking_system_vhdl at 1( 0) + 0 on 11;
+  architecture cp of car_parking_system_vhdl at 20( 558) + 0 on 12;
