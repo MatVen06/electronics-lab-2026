@@ -33,7 +33,7 @@ entity Parking_Controller is
 
         Green_Light : out std_logic;
         Red_Light : out std_logic;
-        display : out std_logic_vector(6 downto 0);
+        display : out std_logic_vector(6 downto 0)
     );
 end entity;
 
@@ -48,15 +48,16 @@ architecture rtl of Parking_Controller is
 
     signal car_count : integer range 0 to PARKING_CAPACITY := 0;
 
-    signal sensor_A_Gin1_prev, sensor_B_Gin1_prev : std_logic;
-    signal sensor_A_Gin2_prev, sensor_B_Gin2_prev : std_logic;
-    signal sensor_A_Gout1_prev, sensor_B_Gout1_prev : std_logic;
-    signal sensor_A_Gout2_prev, sensor_B_Gout2_prev : std_logic;
+    signal sensor_A_Gin1_prev, sensor_B_Gin1_prev : std_logic := '0';
+    signal sensor_A_Gin2_prev, sensor_B_Gin2_prev : std_logic := '0';
+    signal sensor_A_Gout1_prev, sensor_B_Gout1_prev : std_logic := '0';
+    signal sensor_A_Gout2_prev, sensor_B_Gout2_prev : std_logic := '0';
 
-    signal inc_Gin1, inc_Gin2 : std_logic;
-    signal dec_Gout1, dec_Gout2 : std_logic;
+    signal inc_Gin1, inc_Gin2 : std_logic := '0';
+    signal dec_Gout1, dec_Gout2 : std_logic := '0';
 
-    signal payment_accepted_Gout1, payment_accepted_Gout2 : std_logic;
+    signal payment_accepted_Gout1, payment_accepted_Gout2 : std_logic := '0';
+    signal payment_request_Gout1, payment_request_Gout2 : std_logic := '0'; -- fixes weird stuff with payment request being unknown or undefined
 
     function int_to_7_seg(value : integer) return std_logic_vector is
         variable result : std_logic_vector(6 downto 0);
@@ -72,7 +73,7 @@ architecture rtl of Parking_Controller is
         when 7 => result := "0001111"; -- 7
         when 8 => result := "0000000"; -- 8
         when 9 => result := "0000100"; -- 9
-        when others => result := "1111111"; -- error
+        when others => result := "1111111"; -- off
         end case;
         return result;
     end function;
@@ -110,7 +111,7 @@ begin
         end if;
     end process stateregister;
 
-    gin1 process(state_Gin1, sensor_A_Gin1, sensor_B_Gin1, sensor_A_Gin1_prev, sensor_B_Gin1_prev, car_count)
+    gin1: process(state_Gin1, sensor_A_Gin1, sensor_B_Gin1, sensor_A_Gin1_prev, sensor_B_Gin1_prev, car_count)
     begin
         next_state_Gin1 <= state_Gin1;
         barrier_Gin1 <= '0';
@@ -122,12 +123,14 @@ begin
                 next_state_Gin1 <= CAR_DETECTED;
             end if;
         when CAR_DETECTED =>
+            barrier_Gin1 <= '1';
             if sensor_B_Gin1 = '1' then
                 next_state_Gin1 <= CAR_ENTERING;
-            else if sensor_A_Gin1 = '0' then
+            elsif sensor_A_Gin1 = '0' then
                 next_state_Gin1 <= IDLE;
             end if;
         when CAR_ENTERING =>
+            barrier_Gin1 <= '1';
             if sensor_A_Gin1 = '0' and sensor_B_Gin1 = '1' then
                 next_state_Gin1 <= CAR_ENTERED;
             elsif sensor_A_Gin1 = '1' and sensor_B_Gin1 = '0' then
@@ -135,12 +138,13 @@ begin
             end if;
         when CAR_ENTERED =>
             if sensor_B_Gin1 = '0' then
+                inc_Gin1 <= '1';
                 next_state_Gin1 <= IDLE;
             end if;
         end case;
     end process;
 
-    gin2 process(state_Gin2, sensor_A_Gin2, sensor_B_Gin2, sensor_A_Gin2_prev, sensor_B_Gin2_prev, car_count)
+    gin2: process(state_Gin2, sensor_A_Gin2, sensor_B_Gin2, sensor_A_Gin2_prev, sensor_B_Gin2_prev, car_count)
     begin
         next_state_Gin2 <= state_Gin2;
         barrier_Gin2 <= '0';
@@ -152,12 +156,14 @@ begin
                 next_state_Gin2 <= CAR_DETECTED;
             end if;
         when CAR_DETECTED =>
+            barrier_Gin2 <= '1';
             if sensor_B_Gin2 = '1' then
                 next_state_Gin2 <= CAR_ENTERING;
-            else if sensor_A_Gin2 = '0' then
+            elsif sensor_A_Gin2 = '0' then
                 next_state_Gin2 <= IDLE;
             end if;
         when CAR_ENTERING =>
+            barrier_Gin2 <= '1';
             if sensor_A_Gin2 = '0' and sensor_B_Gin2 = '1' then
                 next_state_Gin2 <= CAR_ENTERED;
             elsif sensor_A_Gin2 = '1' and sensor_B_Gin2 = '0' then
@@ -165,16 +171,17 @@ begin
             end if;
         when CAR_ENTERED =>
             if sensor_B_Gin2 = '0' then
+                inc_Gin2 <= '1';
                 next_state_Gin2 <= IDLE;
             end if;
         end case;
     end process;
 
-    gout1 process(state_Gout1, sensor_A_Gout1, sensor_B_Gout1, payment_done, car_count)
+    gout1: process(state_Gout1, sensor_A_Gout1, sensor_B_Gout1, payment_done, car_count)
     begin
         next_state_Gout1 <= state_Gout1;
         barrier_Gout1 <= '0';
-        payment_request <= '0';
+        payment_request_Gout1 <= '0';
         payment_accepted_Gout1 <= '0';
         dec_Gout1 <= '0';
 
@@ -184,11 +191,13 @@ begin
                 next_state_Gout1 <= WAIT_PAYMENT;
             end if;
         when WAIT_PAYMENT =>
-            payment_request <= '1';
+            payment_request_Gout1 <= '1';
             if payment_done = '1' then
+                payment_accepted_Gout1 <= '1';
                 next_state_Gout1 <= PAYMENT_OK;
             end if;
         when PAYMENT_OK =>
+            barrier_Gout1 <= '1';
             payment_accepted_Gout1 <= '1';
             if sensor_B_Gout1 = '1' then
                 next_state_Gout1 <= CAR_EXITING;
@@ -201,16 +210,17 @@ begin
         when CAR_EXITED => 
             barrier_Gout1 <= '1';
             if sensor_B_Gout1 = '0' then
+                dec_Gout1 <= '1';
                 next_state_Gout1 <= IDLE;
             end if;
         end case;
     end process;
 
-    gout2 process(state_Gout2, sensor_A_Gout2, sensor_B_Gout2, payment_done, car_count)
+    gout2: process(state_Gout2, sensor_A_Gout2, sensor_B_Gout2, payment_done, car_count)
     begin
         next_state_Gout2 <= state_Gout2;
         barrier_Gout2 <= '0';
-        payment_request <= '0';
+        payment_request_Gout2 <= '0';
         payment_accepted_Gout2 <= '0';
         dec_Gout2 <= '0';
 
@@ -220,11 +230,13 @@ begin
                 next_state_Gout2 <= WAIT_PAYMENT;
             end if;
         when WAIT_PAYMENT =>
-            payment_request <= '1';
+            payment_request_Gout2 <= '1';
             if payment_done = '1' then
+                payment_accepted_Gout2 <= '1';
                 next_state_Gout2 <= PAYMENT_OK;
             end if;
         when PAYMENT_OK =>
+            barrier_Gout2 <= '1';
             payment_accepted_Gout2 <= '1';
             if sensor_B_Gout2 = '1' then
                 next_state_Gout2 <= CAR_EXITING;
@@ -237,35 +249,56 @@ begin
         when CAR_EXITED => 
             barrier_Gout2 <= '1';
             if sensor_B_Gout2 = '0' then
+                dec_Gout2 <= '1';
                 next_state_Gout2 <= IDLE;
             end if;
         end case;
     end process;
 
-    countermgt: process(clk, nrst)
+    countermgt : process(clk, nrst)
     begin
         if nrst = '0' then
             car_count <= 0;
         elsif rising_edge(clk) then
-            if inc_Gin1 = '1' then
-                car_count <= car_count + 1;
-            elsif inc_Gin2 = '1' then
-                car_count <= car_count + 1;
-            elsif dec_Gout1 = '1' then
-                car_count <= car_count - 1;
-            elsif dec_Gout2 = '1' then
-                car_count <= car_count - 1;
+            -- Handle simultaneous entry/exit
+            if (inc_Gin1 = '1' or inc_Gin2 = '1') and (dec_Gout1 = '1' or dec_Gout2 = '1') then
+                -- Simultaneous entry and exit
+                if (inc_Gin1 = '1' and inc_Gin2 = '1') and (dec_Gout1 = '1' and dec_Gout2 = '1') then
+                    -- 2 entering, 2 exiting: no change
+                    car_count <= car_count;
+                elsif (inc_Gin1 = '1' and inc_Gin2 = '1') then
+                    -- 2 entering, 1 exiting: +1
+                    car_count <= car_count + 1;
+                elsif (dec_Gout1 = '1' and dec_Gout2 = '1') then
+                    -- 1 entering, 2 exiting: -1
+                    car_count <= car_count - 1;
+                else
+                    -- 1 entering, 1 exiting: no change
+                    car_count <= car_count;
+                end if;
+            elsif inc_Gin1 = '1' or inc_Gin2 = '1' then
+                -- Only entries
+                if inc_Gin1 = '1' and inc_Gin2 = '1' then
+                    car_count <= car_count + 2;
+                else
+                    car_count <= car_count + 1;
+                end if;
+            elsif dec_Gout1 = '1' or dec_Gout2 = '1' then
+                -- Only exits
+                if dec_Gout1 = '1' and dec_Gout2 = '1' then
+                    car_count <= car_count - 2;
+                else
+                    car_count <= car_count - 1;
+                end if;
             end if;
         end if;
     end process;
 
-    indicators: process(car_count, payment_accepted_Gout1, payment_accepted_Gout2)
-    begin
-        display <= int_to_7_seg(PARKING_CAPACITY - car_count);
+    display <= int_to_7_seg(PARKING_CAPACITY - car_count);
 
-        Green_Light <= '1' when car_count < PARKING_CAPACITY else '0';
-        Red_Light <= not Green_Light;
+    Green_Light <= '1' when car_count < PARKING_CAPACITY else '0';
+    Red_Light <= '1' when car_count >= PARKING_CAPACITY else '0';
 
-        payment_accepted <= payment_accepted_Gout1 or payment_accepted_Gout2;
-    end process;
-end architecture rtl;
+    payment_accepted <= payment_accepted_Gout1 or payment_accepted_Gout2;
+    payment_request <= payment_request_Gout1 or payment_request_Gout2;
+end rtl;
