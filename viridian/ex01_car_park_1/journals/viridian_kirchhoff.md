@@ -54,7 +54,7 @@ I would've waited to start doing a better mind map before we started coding.
 My teammates are helping me a lot, especially when it comes to understanding how git hub works and different commands.
 
 ### Entry — 2026-18-11
-**Commit reference:** `dadadadad`
+**Commit reference:** `[IMPL] Implemented clkandreset process`
 
 **What I implemented or decided:**
 
