@@ -41,13 +41,8 @@ begin
         if (reset_n = '0') then
             count <= (others => '0'); -- set every bit to 0
         elsif (rising_edge(clk)) then
-            if (count_to_10 = '1') then
+            if (count_to_10 = '1' or count_to_3 = '1') then
                 count <= count + 1;
-            elsif (count_to_3 = '1') then
-                count <= count + 1;
-                if (count = "0010") then 
-                    clock_3 <= '1';
-                end if;
             elsif (count_to_3 = '0' and count_to_10 = '0') then
                 count <= (others => '0');
             end if;
@@ -55,7 +50,7 @@ begin
     end process counter;
 
     clock_10 <= '1' when count = "1001" else '0';
-    clock_3  <= '1' when count = "0010" else '0';
+    clock_3  <= '1' when count = "0010" else '0'; -- This will be generated while counting to 10 too, but we don't care since it is ignored by the FSM.
 
     with hex1_display select
             HEX_1 <= "0000110" when "001", -- E
