@@ -52,3 +52,25 @@ I would've waited to start doing a better mind map before we started coding.
 
 
 My teammates are helping me a lot, especially when it comes to understanding how git hub works and different commands.
+
+### Entry — 2026-18-11
+**Commit reference:** `dadadadad`
+
+**What I implemented or decided:**
+
+In this specific commit we started implementing a process to count the clock and a register for a blinker.
+
+**Why I structured it this way:**
+
+I thought it would be easier to connect our blinker to the clock cycle, so that we make it blink at every clock rise.
+
+
+**What I am not sure about:**
+
+We spent the lesson trying to implement this as not a register, since the pdf doesn't specify an extra signal.
+
+**What the simulation or hardware told me I was wrong about:**
+
+Haven't ran anything yet.
+
+
