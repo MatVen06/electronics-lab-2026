@@ -18,7 +18,7 @@ port(
 end Car_Parking_System_VHDL;
 
 architecture cp of Car_Parking_System_VHDL is
-    type_t State is (IDLE, WAIT_PASSWORD, WRONG_PASS, RIGHT_PASS, STOP);
+    type state_t is (IDLE, WAIT_PASSWORD, WRONG_PASS, RIGHT_PASS, STOP);
     signal state, next_state : state_t;
     signal counter : unsigned(3 downto 0) := "0000"; -- to make it a mathamatical number we use unsogned instead of std_logic_vector--
     signal blink_phase : std_logic := '0';
@@ -44,7 +44,7 @@ architecture cp of Car_Parking_System_VHDL is
                 blink_phase <= '0';
             elsif rising_edge(clk) then 
                 state <= next_state;
-                blink_ohase <= not blink_phase;
+                blink_phase <= not blink_phase;
 
                 if state = WAIT_PASSWORD then 
                     if counter = 10 then
@@ -65,7 +65,7 @@ architecture cp of Car_Parking_System_VHDL is
             next_state <= state;
             pw_ok := (password_1 = pass1_ok) and (password_2 = pass2_0k);
 
-            case _t State is
+            case state is
                 when IDLE => 
                     if front_sensor = '1' then
                         next_state <= WAIT_PASSWORD;
@@ -86,7 +86,7 @@ architecture cp of Car_Parking_System_VHDL is
                     end if;
                 
                 when RIGHT_PASS =>
-                    if frint_senseor = '1' and back_sensor = '1' then
+                    if front_sensor = '1' and back_sensor = '1' then
                         next_state <= STOP;
                     elsif back_sensor = '1' then 
                         next_state <= IDLE;
@@ -96,9 +96,6 @@ architecture cp of Car_Parking_System_VHDL is
                     if back_sensor = '0' then 
                         next_state <= WAIT_PASSWORD;
                     end if;
-
-                when others => 
-                    next_state <= IDLE;
             end case;
         end process;
 
@@ -132,13 +129,9 @@ architecture cp of Car_Parking_System_VHDL is
                     RED_LED <= blink_phase;        
                     HEX_1   <= SEG_S;
                     HEX_2   <= SEG_P;
-
-                when others =>
-                    null;
             end case;
         end process;
 
     end cp;
-
 
 

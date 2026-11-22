@@ -1,0 +1,10 @@
+{
+    "name": "Car_park",
+    "targets": {
+        "rtl": {
+            "libraryMapping": {
+                "": "work"
+            }
+        }
+    }
+}
