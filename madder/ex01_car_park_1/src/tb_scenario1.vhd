@@ -3,26 +3,45 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity tb_scenario1 is
-end tb_scenario1;
+end entity tb_scenario1;
 
 architecture sim of tb_scenario1 is
 
-    -- DUT signals
+    -- Component declaration (matches cp1testbench for consistent VCD hierarchy in VaporView)
+    component Car_Parking_System_VHDL
+        port (
+            clk          : in  std_logic;
+            reset_n      : in  std_logic;
+            front_sensor : in  std_logic;
+            back_sensor  : in  std_logic;
+            password_1   : in  std_logic_vector(1 downto 0);
+            password_2   : in  std_logic_vector(1 downto 0);
+            GREEN_LED    : out std_logic;
+            RED_LED      : out std_logic;
+            HEX_1        : out std_logic_vector(6 downto 0);
+            HEX_2        : out std_logic_vector(6 downto 0)
+        );
+    end component;
+
+    -- Stimulus signals
     signal clk          : std_logic := '0';
     signal reset_n      : std_logic := '0';
     signal front_sensor : std_logic := '0';
     signal back_sensor  : std_logic := '0';
     signal password_1   : std_logic_vector(1 downto 0) := "00";
     signal password_2   : std_logic_vector(1 downto 0) := "00";
+
+    -- Output monitoring signals
     signal GREEN_LED    : std_logic;
     signal RED_LED      : std_logic;
     signal HEX_1        : std_logic_vector(6 downto 0);
     signal HEX_2        : std_logic_vector(6 downto 0);
 
-    -- Clock period
+    -- Clock period and clean simulation stop flag
     constant CLK_PERIOD : time := 10 ns;
+    signal sim_done     : boolean := false;
 
-    -- Expected segment constants (from handout)
+    -- Expected 7-segment display constants (active low)
     constant SEG_OFF : std_logic_vector(6 downto 0) := "1111111";
     constant SEG_E   : std_logic_vector(6 downto 0) := "0000110";
     constant SEG_N   : std_logic_vector(6 downto 0) := "0101011";
@@ -31,11 +50,8 @@ architecture sim of tb_scenario1 is
 
 begin
 
-    -- Clock generation
-    clk <= not clk after CLK_PERIOD / 2;
-
-    -- DUT instantiation
-    DUT : entity work.Car_Parking_System_VHDL
+    -- Unit Under Test (UUT) instantiation
+    UUT : Car_Parking_System_VHDL
         port map (
             clk          => clk,
             reset_n      => reset_n,
@@ -49,11 +65,25 @@ begin
             HEX_2        => HEX_2
         );
 
+    -- Clock generation process (stops cleanly when sim_done is true)
+    clk_process : process
+    begin
+        while not sim_done loop
+            clk <= '0';
+            wait for CLK_PERIOD / 2;
+            clk <= '1';
+            wait for CLK_PERIOD / 2;
+        end loop;
+        wait;
+    end process;
+
     -- Stimulus process
     stim_proc : process
+        variable led_sample_1 : std_logic;
+        variable led_sample_2 : std_logic;
     begin
         -- ------------------------------------------------------------
-        -- Initial reset (reset_n = '0' -> IDLE)
+        -- Step 0: Initial asynchronous reset -> IDLE
         -- ------------------------------------------------------------
         reset_n      <= '0';
         front_sensor <= '0';
@@ -66,77 +96,77 @@ begin
         reset_n <= '1';
         wait for 2 * CLK_PERIOD;
 
-        -- Check IDLE outputs: LEDs off, displays off
+        -- Verify IDLE outputs: LEDs OFF, displays OFF
         assert GREEN_LED = '0' report "IDLE: GREEN_LED should be 0" severity error;
         assert RED_LED   = '0' report "IDLE: RED_LED should be 0"   severity error;
         assert HEX_1 = SEG_OFF report "IDLE: HEX_1 should be OFF"   severity error;
         assert HEX_2 = SEG_OFF report "IDLE: HEX_2 should be OFF"   severity error;
 
         -- ------------------------------------------------------------
-        -- Step 1: Assert front_sensor = '1' -> WAIT_PASSWORD
+        -- Step 1: Car arrives at front sensor -> WAIT_PASSWORD
         -- ------------------------------------------------------------
         front_sensor <= '1';
         wait for CLK_PERIOD;
 
-        -- In WAIT_PASSWORD: RED LED ON steady, displays "En"
-        assert RED_LED = '1'   report "WAIT_PASS: RED_LED should be ON" severity error;
-        assert GREEN_LED = '0' report "WAIT_PASS: GREEN_LED should be OFF" severity error;
-        assert HEX_1 = SEG_E   report "WAIT_PASS: HEX_1 should be 'E'" severity error;
-        assert HEX_2 = SEG_N   report "WAIT_PASS: HEX_2 should be 'n'" severity error;
+        -- Verify WAIT_PASSWORD outputs: RED_LED steady ON, displays "En"
+        assert RED_LED   = '1' report "WAIT_PASSWORD: RED_LED should be ON"  severity error;
+        assert GREEN_LED = '0' report "WAIT_PASSWORD: GREEN_LED should be OFF" severity error;
+        assert HEX_1 = SEG_E   report "WAIT_PASSWORD: HEX_1 should be 'E'"   severity error;
+        assert HEX_2 = SEG_N   report "WAIT_PASSWORD: HEX_2 should be 'n'"   severity error;
 
         -- ------------------------------------------------------------
-        -- Step 2: Wait 10+ clock cycles (keep password wrong/stable)
-        -- ------------------------------------------------------------
-        -- Keep password at "00"/"00" during the waiting period
-        -- (they must be stable during the 10-cycle window)
-        wait for 12 * CLK_PERIOD;
-
-        -- ------------------------------------------------------------
-        -- Step 3: Apply correct password: password_1 = "01", password_2 = "10"
+        -- Step 2: Enter correct password ("01", "10") and wait 10+ cycles
         -- ------------------------------------------------------------
         password_1 <= "01";
         password_2 <= "10";
-        wait for CLK_PERIOD;
+        wait for 12 * CLK_PERIOD;
 
-        -- Now state should be RIGHT_PASS: GREEN LED blinks, displays "GO"
-        -- (blink_phase toggles each clock, so check over a few cycles)
+        -- ------------------------------------------------------------
+        -- Step 3: Verify RIGHT_PASS state ("GO", RED_LED OFF)
+        -- ------------------------------------------------------------
         assert HEX_1 = SEG_G report "RIGHT_PASS: HEX_1 should be 'G'" severity error;
         assert HEX_2 = SEG_O report "RIGHT_PASS: HEX_2 should be 'O'" severity error;
         assert RED_LED = '0' report "RIGHT_PASS: RED_LED should be OFF" severity error;
 
-        -- Check blinking: GREEN_LED should toggle over successive cycles
-        -- Sample GREEN_LED over 2 clock cycles and confirm it changes
+        -- ------------------------------------------------------------
+        -- Step 4: Verify GREEN_LED is actively blinking
+        -- ------------------------------------------------------------
         wait until rising_edge(clk);
-        assert GREEN_LED = '1' or GREEN_LED = '0' report "GREEN_LED invalid" severity error;
-        wait until rising_edge(clk);
-        assert GREEN_LED = '1' or GREEN_LED = '0' report "GREEN_LED invalid" severity error;
+        wait for 1 ns;
+        led_sample_1 := GREEN_LED;
 
-        -- (Optional stricter blink check)
-        -- wait until rising_edge(clk); assert GREEN_LED = '1' ...
-        -- wait until rising_edge(clk); assert GREEN_LED = '0' ...
-        -- depending on phase at entry; leave as informational.
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        led_sample_2 := GREEN_LED;
+
+        assert (led_sample_1 /= led_sample_2)
+            report "RIGHT_PASS: GREEN_LED is not blinking" severity error;
 
         wait for 2 * CLK_PERIOD;
 
         -- ------------------------------------------------------------
-        -- Step 5: Assert back_sensor = '1' -> return to IDLE
+        -- Step 5: Car clears front sensor and triggers back sensor -> IDLE
         -- ------------------------------------------------------------
-        back_sensor <= '1';
+        front_sensor <= '0';
+        back_sensor  <= '1';
         wait for 2 * CLK_PERIOD;
 
-        -- System should return to IDLE: outputs OFF
+        -- Verify return to IDLE: all outputs OFF
         assert GREEN_LED = '0' report "IDLE after exit: GREEN_LED should be 0" severity error;
         assert RED_LED   = '0' report "IDLE after exit: RED_LED should be 0"   severity error;
         assert HEX_1 = SEG_OFF report "IDLE after exit: HEX_1 should be OFF"   severity error;
         assert HEX_2 = SEG_OFF report "IDLE after exit: HEX_2 should be OFF"   severity error;
 
+        -- Clear back sensor after car exits
+        back_sensor <= '0';
+        wait for 2 * CLK_PERIOD;
+
         -- ------------------------------------------------------------
-        -- End simulation
+        -- End simulation cleanly
         -- ------------------------------------------------------------
         report "Scenario 1 testbench completed successfully." severity note;
-        assert false report "Simulation finished" severity failure;
-        wait for 5 * CLK_PERIOD;
+        sim_done <= true;
         wait;
     end process;
 
-end sim;
+end architecture sim;
