@@ -100,4 +100,31 @@ begin
             sensor_B_Gout2_prev <= sensor_B_Gout2;
         end if;
     end process;
+countermgt: process(clk, nrst)
+    variable delta : integer range -2 to 2;
+begin
+    if nrst = '0' then
+        car_count <= 0;
+    elsif rising_edge(clk) then
+        delta := 0;
+
+        if inc_Gin1 = '1' then
+            delta := delta + 1;
+        end if;
+        if inc_Gin2 = '1' then
+            delta := delta + 1;
+        end if;
+        if dec_Gout1 = '1' then
+            delta := delta - 1;
+        end if;
+        if dec_Gout2 = '1' then
+            delta := delta - 1;
+        end if;
+
+        -- apply the net change once, only if the result is valid
+        if (car_count + delta >= 0) and (car_count + delta <= PARKING_CAPACITY) then
+            car_count <= car_count + delta;
+        end if;
+    end if;
+end process;
 end architecture;
