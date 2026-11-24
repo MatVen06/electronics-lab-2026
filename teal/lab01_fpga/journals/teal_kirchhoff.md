@@ -1,6 +1,6 @@
-# Journal — Lab 1 — FPGA Implementation
+# Journal ï¿½ Lab 1 ï¿½ FPGA Implementation
 
-> **You:** `teal_kirchhoff` · **Group:** `teal` · **Opened:** 2026-11-11
+> **You:** `teal_kirchhoff` ï¿½ **Group:** `teal` ï¿½ **Opened:** 2026-11-11
 > The code in this folder is shared with your group. **This journal is yours alone.**
 > Write entries as you work, not after the fact.
 
@@ -8,17 +8,17 @@
 
 ## Decision log
 
-### Entry — 2026-11-11
+### Entry ï¿½ 2026-11-11
 **Commit reference:** `<!-- paste: git log --oneline -1 -->`
 
 **What I implemented or decided:**
-<!-- 2–4 sentences. Be specific about architecture choices. -->
+3cb55ea, a3f3743 I fixed the state diagram, because I realized that there were some scenarios that we didnt consider. 
 
 **Why I structured it this way:**
-<!-- What alternatives did you consider? Why did you reject them? -->
+From the state Wrong_Pass if a wrong password is entered we must stay in the state Wrong_Pass. We didnt consider this possibility
 
 **What I am not sure about:**
-<!-- Honest uncertainty. Never graded for correctness — only for presence. -->
+I'm still not sure about the reset. Up to now we decided to keep an arrow that goes into Idle with reset_n=0 but I'm not sure it is the right way.
 
 **What the simulation or hardware told me I was wrong about:**
 <!-- Leave blank now. Fill in when you find out. Most important field. -->

@@ -1,0 +1,100 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity CPS_tb is
+end CPS_tb;
+
+architecture first of CPS_tb is
+
+    constant clk_hz : integer := 100;
+    constant time   : time    := 1000 ms/clk_hz;
+
+    signal clk          : std_logic := '0';
+    signal reset_n      : std_logic := '1';
+    signal front_sensor : std_logic; 
+    signal back_sensor  : std_logic;
+    signal password_1   : std_logic_vector(1 downto 0);
+    signal password_2   : std_logic_vector(1 downto 0);
+    signal GREEN_LED    : std_logic;
+    signal RED_LED      : std_logic;
+    signal HEX_1        : std_logic_vector(6 downto 0);
+    signal HEX_2        : std_logic_vector(6 downto 0);
+
+begin
+
+    DUT: entity work.Car_Parking_System_VHDL
+    port map(
+        clk => clk,
+        reset_n => reset_n,
+        front_sensor => front_sensor,
+        back_sensor => back_sensor,
+        password_1 => password_1,
+        password_2 => password_2,
+        GREEN_LED => GREEN_LED,
+        RED_LED => RED_LED,
+        HEX_1 => HEX_1,
+        HEX_2 => HEX_2
+    );
+
+    clk <= not clk after clk_period / 2;
+
+    SEQUENCER_PROC : process is
+        variable blink :std_logic := '0';
+    begin
+      
+      reset_n <= '0';
+      front_sensor <= '0';
+      back_sensor <= '0';
+      password_1 <= "00";
+      password_2  <= "00";
+
+
+      front_sensor <= '1';
+      wait for 5/clk_hz s;
+      password_1 <= "01";
+      password_2 <= "10";
+      wait for 15/clk_hz s; 
+      front_sensor <= '1';
+      back_sensor <= '1';
+      
+      blink = RED_LED;
+      wait for 1/clk_hz s;
+      assert (blink = not RED_LED)
+        report "RED closed";
+      assert (HEX_1 = "0100100" and HEX_2 = "0001100")
+        report "Wrong display";
+       
+        wait for 5/clk_hz s;
+      password_1 <= "01";
+      password_2 <= "10";
+      wait for 15/clk_hz s; 
+      front_sensor <= '1';
+      back_sensor <= '1';
+      
+      
+      blink = RED_LED;
+      wait for 1/clk_hz s;
+      assert (blink = not RED_LED)
+        report "RED closed";
+      assert (HEX_1 = "0100100" and HEX_2 = "0001100")
+        report "Wrong display";
+
+        wait for 5/clk_hz s;
+      password_1 <= "01";
+      password_2 <= "10";
+      wait for 15/clk_hz s; 
+      front_sensor <= '0';
+      back_sensor <= '1';
+      
+
+      blink = GREEN_LED;
+      wait for 1/clk_hz s;
+      assert (blink = not GREEN_LED)
+        report "RED closed";
+      assert (HEX_1 = "0000010" and HEX_2 = "1000000")
+        report "Wrong display";
+        
+
+    end process;
+end architecture;

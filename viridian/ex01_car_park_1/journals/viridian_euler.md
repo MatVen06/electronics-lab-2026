@@ -14,6 +14,8 @@
 **What I implemented or decided:**
 <!-- 2–4 sentences. Be specific about architecture choices. -->
 We decided how to divide the work. Two of us will work on the TB.  
+18/11 I created 2 of the TB and tried to correct some errors done. I am waiting for the complete system so i can 
+test it 
 **Why I structured it this way:**
 <!-- What alternatives did you consider? Why did you reject them? -->
 
