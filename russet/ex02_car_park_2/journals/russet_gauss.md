@@ -8,7 +8,7 @@
 
 ## Decision log
 
-### Entry � 2026-11-11
+### Entry � 2026-11-24
 **Commit reference:** `<e7054b03d6bb9f24e31dd3362130b47d5d1b0aa1>`
 
 **What I implemented or decided:**
