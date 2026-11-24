@@ -19,7 +19,7 @@ architecture sim of parking_tb_case1 is
     signal Green_Light, Red_Light : std_logic;
     signal display : std_logic_vector(6 downto 0);
 begin
-    -- device under test
+
     dut: entity work.Parking_Controller
     generic map (PARKING_CAPACITY => 7)
     port map (
@@ -65,6 +65,30 @@ begin
 
     assert display = "0100000" report "display should show 6 after one car entered" severity error;
     assert Green_Light = '1'   report "green light should be on" severity error;
+
+    sensor_A_Gout1 <= '1';  sensor_B_Gout1 <= '0';
+    wait for 30 ns;
+    assert payment_request = '1' report "payment request should be on" severity error;
+
+
+    payment_done <= '1';
+    wait for 30 ns;
+    payment_done <= '0';
+    assert barrier_Gout1 = '1' report "exit barrier should be open after payment" severity error;
+
+    sensor_A_Gout1 <= '1';  sensor_B_Gout1 <= '1';
+    wait for 30 ns;
+
+
+    sensor_A_Gout1 <= '0';  sensor_B_Gout1 <= '1';
+    wait for 30 ns;
+
+
+    sensor_A_Gout1 <= '0';  sensor_B_Gout1 <= '0';
+    wait for 30 ns;
+
+    assert display = "0001111" report "display should show 7 after the car left" severity error;
+    assert payment_request = '0' report "payment request should be off after exit" severity error;
         report "TB finished";
         wait;                            
     end process;
