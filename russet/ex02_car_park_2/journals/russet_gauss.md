@@ -33,12 +33,12 @@ i am not really sure wheter it works or it just hides the car if there is 1 spot
 I implemented both the testbenches
 
 **Why I structured it this way:**
-i struced tb 2 dis way even if it fails to run the vhdl so that we can look for a fix  
+i structured tb 2 this way even if it fails to run the vhdl so that we can look for a fix  
 **What I am not sure about:**
 how should i fix the overbooking, and the payment as one pulse could affect both gates to open 
 
 **What the simulation or hardware told me I was wrong about:**
-that the code doesnt work for case where 2 cars are lined up and there is only one spot left, as it goes in overbooking
+that the code doesn't work for case where 2 cars are lined up and there is only one spot left, as it goes in overbooking
 
 ## Post-submission reflection
 
