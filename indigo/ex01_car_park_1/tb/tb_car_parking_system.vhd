@@ -132,7 +132,9 @@ begin
     -- 4. Input correct password
     s_password_1 <= "01";
     s_password_2 <= "10";
-    wait for CLK_PERIOD * 2;
+    -- the password must be stable for 10 clock cycles (12 to give 1-2 extra
+    -- cycles for the state transition)
+    wait for CLK_PERIOD * 12;
 
     -- 5. Verify: System goes to RIGHT_PASSWORD (Display GO --> "0000010" and "1000000" )
     assert (s_HEX_1 = "0000010" and s_HEX_2 = "1000000")
