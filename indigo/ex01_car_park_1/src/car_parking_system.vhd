@@ -27,12 +27,26 @@ architecture rtl of Car_Parking_System_VHDL is
   signal current_state : state_type;
   signal next_state    : state_type;
 
-  constant TRUE_PASSWORD : std_logic_vector(3 downto 0) := "1010"; -- password_1 & password_2
+  constant TRUE_PASSWORD : std_logic_vector(3 downto 0) := "0110"; -- password_1 & password_2
 
   -- tick counter: counts clock cycles spent in the current state
   signal tick : natural range 0 to 255;
 
   signal stable : boolean := true; -- true if password is stable (not changing) for 1 clock cycle
+
+  signal state_code      : std_logic_vector(2 downto 0);
+  signal next_state_code : std_logic_vector(2 downto 0);
+
+  function encode(s : state_type) return std_logic_vector is
+  begin
+    case s is
+      when IDLE => return "000";
+      when WAIT_PASSWORD => return "001";
+      when WRONG_PASSWORD => return "010";
+      when RIGHT_PASSWORD => return "011";
+      when STOP => return "100";
+    end case;
+  end function;
 
   -- DISPLAY CONSTANTS
   constant HEX_OFF : std_logic_vector(6 downto 0) := "1111111";
@@ -44,6 +58,11 @@ architecture rtl of Car_Parking_System_VHDL is
   constant HEX_P   : std_logic_vector(6 downto 0) := "0001100";
 
 begin
+
+  -- debug mirrors of the FSM state (see STATE TABLE above); unused by the
+  -- logic, so synthesis removes them
+  state_code      <= encode(current_state);
+  next_state_code <= encode(next_state);
 
   -- Clocked data path: state register + tick counter (asynchronous reset)
   DATA_PATH: process (clk, reset_n)
