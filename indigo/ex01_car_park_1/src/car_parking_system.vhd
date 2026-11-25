@@ -31,6 +31,8 @@ architecture rtl of Car_Parking_System_VHDL is
 
   -- tick counter: counts clock cycles spent in the current state
   signal tick : natural range 0 to 255;
+  -- Blink signal toggles on every clock edge; drives the blinking LEDs
+  signal blink : std_logic;
 
   signal stable : boolean := true; -- true if password is stable (not changing) for 1 clock cycle
 
@@ -70,8 +72,10 @@ begin
     if reset_n = '0' then
       current_state <= IDLE;
       tick <= 0;
+      blink <= '0';
     elsif rising_edge(clk) then
       current_state <= next_state;
+      blink <= not blink; -- toggles on every clock edge
 
       if next_state /= current_state then
         tick <= 0; -- restart counting on every state change
@@ -135,7 +139,7 @@ begin
   -----------------------------------------------------------------------------
   -- Combinational output logic
   -----------------------------------------------------------------------------
-  OUTPUTS: process (current_state, tick)
+  OUTPUTS: process (current_state, tick, blink)
   begin
     -- defaults: LEDs off, displays off
     GREEN_LED <= '0';
@@ -152,27 +156,15 @@ begin
         HEX_1 <= HEX_E;
         HEX_2 <= HEX_n;
       when WRONG_PASSWORD =>
-        if (tick mod 2) = 0 then
-          RED_LED <= '1';
-        else
-          RED_LED <= '0';
-        end if;
+        RED_LED <= blink;
         HEX_1 <= HEX_E;
         HEX_2 <= HEX_E;
       when RIGHT_PASSWORD =>
-        if (tick mod 2) = 0 then
-          GREEN_LED <= '1';
-        else
-          GREEN_LED <= '0';
-        end if;
+        GREEN_LED <= blink;
         HEX_1 <= HEX_G;
         HEX_2 <= HEX_O;
       when STOP =>
-        if (tick mod 2) = 0 then
-          RED_LED <= '1';
-        else
-          RED_LED <= '0';
-        end if;
+        GREEN_LED <= blink;
         HEX_1 <= HEX_S;
         HEX_2 <= HEX_P;
 
