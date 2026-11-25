@@ -191,10 +191,14 @@ begin
                 next_state_Gout1 <= WAIT_PAYMENT;
             end if;
         when WAIT_PAYMENT =>
-            payment_request_Gout1 <= '1';
-            if payment_done = '1' then
-                payment_accepted_Gout1 <= '1';
-                next_state_Gout1 <= PAYMENT_OK;
+            if sensor_A_Gout1 = '0' then
+                next_state_Gout1 <= IDLE;
+            else
+                payment_request_Gout1 <= '1';
+                if payment_done = '1' then
+                    payment_accepted_Gout1 <= '1';
+                    next_state_Gout1 <= PAYMENT_OK;
+                end if;
             end if;
         when PAYMENT_OK =>
             barrier_Gout1 <= '1';
@@ -230,10 +234,14 @@ begin
                 next_state_Gout2 <= WAIT_PAYMENT;
             end if;
         when WAIT_PAYMENT =>
-            payment_request_Gout2 <= '1';
-            if payment_done = '1' then
-                payment_accepted_Gout2 <= '1';
-                next_state_Gout2 <= PAYMENT_OK;
+            if sensor_A_Gout2 <= '0' then
+                next_state_Gout2 <= IDLE;
+            else
+                payment_request_Gout2 <= '1';
+                if payment_done = '1' then
+                    payment_accepted_Gout2 <= '1';
+                    next_state_Gout2 <= PAYMENT_OK;
+                end if;
             end if;
         when PAYMENT_OK =>
             barrier_Gout2 <= '1';
