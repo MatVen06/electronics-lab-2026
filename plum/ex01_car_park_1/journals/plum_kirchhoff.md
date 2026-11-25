@@ -9,7 +9,7 @@
 ## Decision log
 
 ### Entry — 2026-11-11
-**Commit reference:** `<!-- paste: git log --oneline -1 -->`
+**Commit reference:** `49b6d72`
 
 **What I implemented or decided:**
 I designed a car parking controller using a Finite State Machine with five states: IDLE, WAIT_PASS, WRONG_PASS, RIGHT_PASS, and STOP. I implemented the FSM in VHDL, separating the entity and port declarations, state registers, next-state logic, counter, blinking logic, and output logic for the LEDs and seven-segment displays. I also developed a testbench to verify vehicle detection, password verification, and vehicle movement through the entrance.
