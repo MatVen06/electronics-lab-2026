@@ -36,3 +36,32 @@ entity Parking_Controller is
         display          : out std_logic_vector(6 downto 0)
     );
 end entity;
+
+architecture Behavioral of Parking_Controller is
+    -- State machine types
+    type   gate_state_type               is (IDLE, CAR_DETECTED, CAR_ENTERING, CAR_ENTERED);
+    type   exit_state_type               is (IDLE, WAIT_PAYMENT, PAYMENT_OK,
+                                             CAR_EXITING, CAR_EXITED);
+    -- State signals for each gate
+    signal state_Gin1, next_state_Gin1   : gate_state_type;
+    signal state_Gin2, next_state_Gin2   : gate_state_type;
+    signal state_Gout1, next_state_Gout1 : exit_state_type;
+    signal state_Gout2, next_state_Gout2 : exit_state_type;
+
+    -- Car counter
+    signal car_count : integer range 0 to PARKING_CAPACITY := 0;
+
+    -- Edge detection for sensors
+    signal sensor_A_Gin1_prev, sensor_B_Gin1_prev   : std_logic;
+    signal sensor_A_Gin2_prev, sensor_B_Gin2_prev   : std_logic;
+    signal sensor_A_Gout1_prev, sensor_B_Gout1_prev : std_logic;
+    signal sensor_A_Gout2_prev, sensor_B_Gout2_prev : std_logic;
+
+    -- Increment/decrement flags
+    signal inc_Gin1, inc_Gin2   : std_logic;
+    signal dec_Gout1, dec_Gout2 : std_logic;
+
+    -- Payment signals
+    signal payment_accepted_Gout1, payment_accepted_Gout2 : std_logic;
+begin
+end architecture;
