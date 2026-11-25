@@ -27,8 +27,6 @@
 Entry - 2026-11-18
 Commit reference: <paste-your-commit-hash> (Note: Pushed by a classmate on my behalf due to a GitHub invitation issue.)
 
-[TEST]: Switch to black-box self-checking testbench and implement all 4 scenarios
-
 What I implemented or decided:
 - Implemented the testbench for the parking system from a white-box approach to a black-box.
 - Implemented assert checks for all four scenarios
@@ -44,15 +42,18 @@ What I am not sure about:
 
 What the simulation or hardware told me I was wrong about:
 - The assertions failed because they were placed right after signal assignments (<=) without a wait statement, and because back_sensor was left at '1' between scenarios.
-- I also realized that checking GREEN_LED = '1' or RED_LED = '1' at a single moment in blinking states can fail randomly depending on which half of the clock cycle the simulation samples, so checking the steady 7-segment display characters ("GO", "EE", "SP") is much more reliable
+- I also realized that checking GREEN_LED = '1' or RED_LED = '1' at a single moment in blinking states can fail randomly depending on which half of the clock cycle the simulation samples, so checking the steady 7-segment display characters ("GO", "EE", "SP") is much more reliable.
 
 
 ## Post-submission reflection
 
 **What worked and why:**
+- Switching from the initial white-box draft to a black-box testbench worked well because verifying the system strictly through its external inputs and outputs (LEDs and 7-segment displays) made the tests cleaner, easier to maintain, and independent of internal DUT signals.
+- Breaking the stimulus into modular test scenarios (single-car entry, wrong password recovery, multi-car STOP handling, and asynchronous reset) made debugging state transitions straightforward.
 
 **What I would change and why:**
-<!-- Be specific. Reference commit hashes. -->
+- I would start directly with a black-box architecture instead of bundling all inputs and outputs into a single 7-bit drive vector which wasted time and made managing delays and display checks unnecessarily complicated.
+-I would coordinate the testbench delays better with the timing of the main program, as mismatches between them caused us to lose time looking for a fundamental bug in one of the two files that was not actually there.
 
 **What assumption did I carry in from the previous exercise that I had to revise here:**
 <!-- Required from Exercise 2 onward. -->
