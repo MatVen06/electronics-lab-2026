@@ -36,6 +36,12 @@ architecture rtl of Car_Parking_System_VHDL is
 
   signal stable : boolean := true; -- true if password is stable (not changing) for 1 clock cycle
 
+  -- password stability: previous password and number of clock cycles it has
+  -- not changed (saturating)
+  constant STABLE_CYCLES : natural := 10;
+  signal password_prev   : std_logic_vector(3 downto 0);
+  signal pw_stable_cnt   : natural range 0 to 15;
+
   signal state_code      : std_logic_vector(2 downto 0);
   signal next_state_code : std_logic_vector(2 downto 0);
 
@@ -73,9 +79,19 @@ begin
       current_state <= IDLE;
       tick <= 0;
       blink <= '0';
+      password_prev <= (others => '0');
+      pw_stable_cnt <= 0;
     elsif rising_edge(clk) then
       current_state <= next_state;
       blink <= not blink; -- toggles on every clock edge
+
+      -- count how long the password has been unchanged
+      password_prev <= password_1 & password_2;
+      if (password_1 & password_2) /= password_prev then
+        pw_stable_cnt <= 0; -- password changed: restart counting
+      elsif pw_stable_cnt < 15 then
+        pw_stable_cnt <= pw_stable_cnt + 1;
+      end if;
 
       if next_state /= current_state then
         tick <= 0; -- restart counting on every state change
@@ -87,7 +103,7 @@ begin
   end process;
 
   -- Combinational FSM: next-state logic
-  FSM: process (current_state, front_sensor, back_sensor, password_1, password_2, tick)
+  FSM: process (current_state, front_sensor, back_sensor, password_1, password_2, tick, pw_stable_cnt)
   begin
     next_state <= current_state; -- default: stay in the same state
     case current_state is
@@ -113,9 +129,11 @@ begin
           next_state <= IDLE;
         end if;
       when WRONG_PASSWORD =>
-        if tick >= 10 then
-          next_state <= WAIT_PASSWORD;
-          stable <= true; -- password is stable at the beginning of WAIT_PASSWORD
+        -- correct password entered and held stable for 10 clock cycles
+        -- (password = password_prev: the count belongs to the current password)
+        if (password_1 & password_2) = TRUE_PASSWORD and password_prev = TRUE_PASSWORD
+           and pw_stable_cnt >= STABLE_CYCLES then
+          next_state <= RIGHT_PASSWORD;
         end if;
         if front_sensor = '0' then
           next_state <= IDLE;
