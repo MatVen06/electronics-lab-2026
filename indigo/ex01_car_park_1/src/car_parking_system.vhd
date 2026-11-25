@@ -113,7 +113,7 @@ begin
           next_state <= IDLE;
         end if;
       when WRONG_PASSWORD =>
-        if tick >= 20 then
+        if tick >= 10 then
           next_state <= WAIT_PASSWORD;
           stable <= true; -- password is stable at the beginning of WAIT_PASSWORD
         end if;
@@ -124,8 +124,8 @@ begin
         if back_sensor = '1' and front_sensor = '1' then
           next_state <= STOP;
         else
-          if back_sensor = '0' and tick >= 10 then
-            next_state <= IDLE;
+          if back_sensor = '1' then
+            next_state <= IDLE; -- car has passed the gate
           end if;
         end if;
 
