@@ -68,7 +68,9 @@ begin
         GREEN_LED      <= enable_green;
         RED_LED        <= enable_red;
 
-        -- TODO: check of the password.
+        --check of the password.
+		check_pswd <= '1' when (password_1 = '01' and password_2 = '10') else '0';
+	
 end architecture rtl;
 
 
