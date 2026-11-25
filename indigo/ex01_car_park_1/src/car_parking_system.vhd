@@ -30,17 +30,19 @@ architecture rtl of Car_Parking_System_VHDL is
   constant TRUE_PASSWORD : std_logic_vector(3 downto 0) := "0110"; -- password_1 & password_2
 
   -- tick counter: counts clock cycles spent in the current state
-  signal tick : natural range 0 to 255;
+  -- (4 bits, saturating: enough for the 10-cycle wait)
+  signal tick : natural range 0 to 15;
   -- Blink signal toggles on every clock edge; drives the blinking LEDs
   signal blink : std_logic;
-
-  signal stable : boolean := true; -- true if password is stable (not changing) for 1 clock cycle
 
   -- password stability: previous password and number of clock cycles it has
   -- not changed (saturating)
   constant STABLE_CYCLES : natural := 10;
   signal password_prev   : std_logic_vector(3 downto 0);
   signal pw_stable_cnt   : natural range 0 to 15;
+
+  -- true when the correct password has been held stable for STABLE_CYCLES
+  signal password_ok : boolean;
 
   signal state_code      : std_logic_vector(2 downto 0);
   signal next_state_code : std_logic_vector(2 downto 0);
@@ -67,10 +69,17 @@ architecture rtl of Car_Parking_System_VHDL is
 
 begin
 
-  -- debug mirrors of the FSM state (see STATE TABLE above); unused by the
-  -- logic, so synthesis removes them
+  -- debug mirrors of the FSM state as 3-bit codes (see encode()), because
+  -- GHDL does not dump enumeration signals to out.vcd; unused by the logic,
+  -- so synthesis removes them
   state_code      <= encode(current_state);
   next_state_code <= encode(next_state);
+
+  -- correct password, held stable for 10 clock cycles
+  -- (password = password_prev: the count belongs to the current password)
+  password_ok <= (password_1 & password_2) = TRUE_PASSWORD
+                 and password_prev = TRUE_PASSWORD
+                 and pw_stable_cnt >= STABLE_CYCLES;
 
   -- Clocked data path: state register + tick counter (asynchronous reset)
   DATA_PATH: process (clk, reset_n)
@@ -95,7 +104,7 @@ begin
 
       if next_state /= current_state then
         tick <= 0; -- restart counting on every state change
-      elsif tick < 255 then
+      elsif tick < 15 then
         tick <= tick + 1;
       end if;
 
@@ -103,36 +112,29 @@ begin
   end process;
 
   -- Combinational FSM: next-state logic
-  FSM: process (current_state, front_sensor, back_sensor, password_1, password_2, tick, pw_stable_cnt)
+  FSM: process (current_state, front_sensor, back_sensor, tick, password_ok)
   begin
     next_state <= current_state; -- default: stay in the same state
     case current_state is
       when IDLE =>
         if front_sensor = '1' then
           next_state <= WAIT_PASSWORD;
-          stable <= true; -- password is stable at the beginning of WAIT_PASSWORD
         end if;
 
       when WAIT_PASSWORD =>
-        if password_1'event or password_2'event then
-          stable <= false; -- password is changing
-        else
-          if tick >= 10 then
-            if stable = true and (password_1 & password_2) = TRUE_PASSWORD then
-              next_state <= RIGHT_PASSWORD;
-            else
-              next_state <= WRONG_PASSWORD;
-            end if;
+        -- after 10 cycles: right only if the password was correct and stable
+        if tick >= 10 then
+          if password_ok then
+            next_state <= RIGHT_PASSWORD;
+          else
+            next_state <= WRONG_PASSWORD;
           end if;
         end if;
         if front_sensor = '0' then
           next_state <= IDLE;
         end if;
       when WRONG_PASSWORD =>
-        -- correct password entered and held stable for 10 clock cycles
-        -- (password = password_prev: the count belongs to the current password)
-        if (password_1 & password_2) = TRUE_PASSWORD and password_prev = TRUE_PASSWORD
-           and pw_stable_cnt >= STABLE_CYCLES then
+        if password_ok then
           next_state <= RIGHT_PASSWORD;
         end if;
         if front_sensor = '0' then
@@ -148,8 +150,14 @@ begin
         end if;
 
       when STOP =>
+        -- wait for car 1 to clear the back sensor, then let car 2 in with the
+        -- correct password (or go back to IDLE if car 2 has gone away)
         if back_sensor = '0' then
-          next_state <= IDLE;
+          if password_ok then
+            next_state <= RIGHT_PASSWORD;
+          elsif front_sensor = '0' then
+            next_state <= IDLE;
+          end if;
         end if;
     end case;
   end process;
@@ -157,7 +165,7 @@ begin
   -----------------------------------------------------------------------------
   -- Combinational output logic
   -----------------------------------------------------------------------------
-  OUTPUTS: process (current_state, tick, blink)
+  OUTPUTS: process (current_state, blink)
   begin
     -- defaults: LEDs off, displays off
     GREEN_LED <= '0';
@@ -182,7 +190,7 @@ begin
         HEX_1 <= HEX_G;
         HEX_2 <= HEX_O;
       when STOP =>
-        GREEN_LED <= blink;
+        RED_LED <= blink;
         HEX_1 <= HEX_S;
         HEX_2 <= HEX_P;
 
