@@ -152,6 +152,117 @@ GHDL rejects `tick'high` ("object prefix must be an array"): on a scalar, `'high
 **What I am not sure about:**
 
 **What the simulation or hardware told me I was wrong about:**
+---
+### Entry - 2026-11-25
+**Commit reference:** `6b4c9f1 [IMPL]: add testbench`
+
+**What I implemented or decided:**
+I added `tb/tb_car_parking_system.vhd` (made by the other part of the group) to follow the four scenarios of the handout (section 5): normal entry, wrong password, multiple cars, reset.
+
+**Why I structured it this way:**
+The previous testbench was built around a vector-driving procedure and only covered Part A. Writing one block per handout scenario makes it easy to check that every scenario is covered and to explain it in the report.
+
+**What I am not sure about:**
+
+**What the simulation or hardware told me I was wrong about:**
+The first run gave 6 assertion errors.
+
+---
+### Entry - 2026-11-25
+**Commit reference:** `913efb9 [IMPL]: add state enumerator for debug`
+
+**What I implemented or decided:**
+- I added `state_code` and `next_state_code`, 3-bit mirrors of `current_state`/`next_state`, produced by an `encode()` function (IDLE = 000, WAIT_PASSWORD = 001, WRONG_PASSWORD = 010, RIGHT_PASSWORD = 011, STOP = 100).
+- I changed `TRUE_PASSWORD` from `"1010"` to `"0110"`.
+
+**Why I structured it this way:**
+GHDL does not write signals of an enumerated type to the VCD file, so `current_state` was invisible in `out.vcd`. With the 3-bit codes I can read the state sequence directly in the waveform. The FSM logic does not use these signals, so synthesis removes them. The password change follows the handout (`"01"` and `"10"`).
+
+**What I am not sure about:**
+
+**What the simulation or hardware told me I was wrong about:**
+The waveform made the password bug obvious: the state went `000 -> 001 -> 010 -> 000` and never reached `011`.
+
+---
+### Entry - 2026-11-25
+**Commit reference:** `a23ecc9 [IMPL]: modify blink logic`
+
+**What I implemented or decided:**
+I added a `blink` register in `DATA_PATH` that toggles on every clock edge (reset to `'0'`). The blinking LEDs are now driven by `blink` instead of `tick mod 2`.
+
+**Why I structured it this way:**
+`tick` saturates and restarts on every state change, so it is not a good clock for blinking: once it stops counting, the LED stops blinking. A free-running toggle does not depend on how long we stay in a state. The handout says blinking happens at clock frequency, so toggling every cycle is enough for simulation.
+
+**What I am not sure about:**
+
+**What the simulation or hardware told me I was wrong about:**
+In this commit I also wrote `GREEN_LED <= blink` in STOP, where the handout says the red LED blinks. The testbench did not catch it because it does not check the LEDs. Fixed in `927e916`.
+
+---
+### Entry - 2026-11-25
+**Commit reference:** `0aa7632 [FIX]: fix bug for idle transition`
+
+**What I implemented or decided:**
+- RIGHT_PASSWORD now goes to IDLE when `back_sensor = '1'`, instead of `back_sensor = '0'` and `tick >= 10`.
+- The WRONG_PASSWORD wait went from 20 to 10 ticks.
+
+**Why I structured it this way:**
+The handout's Scenario 1 asserts `back_sensor = '1'` and expects IDLE: the car reaching the back sensor means it has passed the gate. With my old condition, the car stayed in RIGHT_PASSWORD while it was on the back sensor, and the FSM only left after a timeout. I only changed this one transition, to see its effect alone in the simulation (5 errors down to 3).
+
+**What I am not sure about:**
+
+**What the simulation or hardware told me I was wrong about:**
+Scenario 1 passes now, and the Scenario 2 "EE" check also passes: it was failing only because Scenario 1 left the FSM in the wrong state.
+
+---
+### Entry - 2026-11-25
+**Commit reference:** `efe6964 [FIX]: modify stable password logic to clocked version`
+
+**What I implemented or decided:**
+- In `DATA_PATH` I added `password_prev` (last cycle's password) and `pw_stable_cnt`, which counts how many cycles the password has not changed and restarts at 0 when it changes.
+- WRONG_PASSWORD now goes to RIGHT_PASSWORD when the password is correct and has been stable for `STABLE_CYCLES = 10` cycles. It no longer goes back to WAIT_PASSWORD after a timeout.
+
+**Why I structured it this way:**
+The handout says that in WRONG_PASSWORD, entering the correct password leads to RIGHT_PASSWORD. I wanted the same rule as in WAIT_PASSWORD: the password must be stable for 10 cycles before it is accepted. A previous-value register and a counter make that clocked and synthesizable, unlike `'event`.
+
+**What I am not sure about:**
+
+**What the simulation or hardware told me I was wrong about:**
+
+---
+### Entry - 2026-11-25
+**Commit reference:** `6ebab2c [FIX]: make testbench wait for 10 cycles`
+
+**What I implemented or decided:**
+In Scenario 2, after entering the correct password, the testbench now waits 12 clock periods instead of 2 before checking for RIGHT_PASSWORD.
+
+**Why I structured it this way:**
+With the 10-cycle stability rule from `efe6964`, 2 cycles are too short, and the check failed even though the design was behaving as intended. 12 cycles gives 1-2 cycles of margin, as in the other scenarios.
+
+**What I am not sure about:**
+
+**What the simulation or hardware told me I was wrong about:**
+
+---
+### Entry - 2026-11-25
+**Commit reference:** `927e916 [FIX]: replace password checks with clocked logic ∙ fix small led blink bug in stop`
+
+**What I implemented or decided:**
+- I removed `stable` and the `password_1'event`/`password_2'event` check completely. A combinational signal `password_ok` (correct password, same as last cycle, `pw_stable_cnt >= 10`) is now used by WAIT_PASSWORD, WRONG_PASSWORD and STOP.
+- STOP waits for car 1 to clear the back sensor. Then, if `password_ok`, it goes to RIGHT_PASSWORD; if car 2 has gone away too (both sensors `'0'`), it goes back to IDLE.
+- The red LED (not the green one) blinks in STOP.
+- Clean-up:
+  - `tick` reduced to `0 to 15`.
+  - `tick` removed from the `OUTPUTS` sensitivity list.
+  - The comment about the debug codes corrected.
+
+**Why I structured it this way:**
+
+**What I am not sure about:**
+
+**What the simulation or hardware told me I was wrong about:**
+After this commit the testbench runs with 0 assertion errors, the waveform goes through all five states, and `ghdl --synth` accepts the design.
+
 
 ---
 
