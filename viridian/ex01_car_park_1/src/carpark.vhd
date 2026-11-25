@@ -40,22 +40,19 @@ begin
         if reset_n = '0' then
             current_state <= IDLE;
             clk_counter <= (others => '0');
-            blink <= '0';
+            --blink <= '0';
         elsif rising_edge(clk) then
             current_state <= next_state;
-            blink <= not blink;
 
-            if current_state = WAIT_PASSWORD then
-                if clk_counter < 10 then
-                    clk_counter <= clk_counter + 1;
-                end if;
-            else
+            if current_state /= next_state then
                 clk_counter <= (others => '0');
+            elsif clk_counter < 9 then
+                    clk_counter <= clk_counter + 1;
             end if;
         end if;
     end process clkandreset;
 
-    state_processes: process(current_state, front_sensor, back_sensor, password_1, password_2, clk_counter, blink)
+    state_processes: process(current_state, front_sensor, back_sensor, password_1, password_2, clk_counter)
     begin
 
         next_state <= current_state;
@@ -63,6 +60,57 @@ begin
         RED_LED <= '0';
         HEX_1 <= CHAR_OFF;
         HEX_2<= CHAR_OFF;
-    end process state_processes;
 
-end architecture rtl;
+        case current_state is 
+            when IDLE =>
+                if(front_sensor = '1') then
+                    next_state <= WAIT_PASSWORD;
+                end if;
+            --Idle done
+
+            when WAIT_PASSWORD =>
+                RED_LED <= '1';
+                HEX_1 <= CHAR_E;
+                HEX_2<= CHAR_n;
+                
+                if clk_counter = 9 then
+                    if (password_1 = "01" and password_2 = "10") then
+                        next_state <= RIGHT_PASS;
+                    else
+                        next_state <= WRONG_PASS;
+                    end if;
+                end if;
+            
+            when RIGHT_PASS =>
+                GREEN_LED <= clk_counter(0);
+                HEX_1 <= CHAR_G;
+                HEX_2 <= CHAR_O;
+
+                if clk_counter >= 9 then    
+                    if (front_sensor = '1' and back_sensor = '1') then
+                        next_state <= STOP;
+                    elsif back_sensor = '1' then
+                        next_state <= IDLE;
+                    end if;
+                end if;
+            
+            when WRONG_PASS =>
+                RED_LED <= clk_counter(0);
+                HEX_1 <= CHAR_E;
+                HEX_2 <= CHAR_E;
+
+                if clk_counter >= 9 then
+                    next_state <= WAIT_PASSWORD;
+                end if;
+
+            when STOP =>
+                RED_LED <= '1';
+                HEX_1 <= CHAR_S;
+                HEX_2 <= CHAR_P;
+
+                if (password_1 = "01" and password_2 = "10") then
+                    next_state <= RIGHT_PASS;
+                end if;
+            end case;
+        end process state_processes;
+    end architecture rtl;
