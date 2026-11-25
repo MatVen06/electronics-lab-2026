@@ -60,16 +60,32 @@
 
 **What I implemented or decided:**
 We worked on the other testbench scenarios and had to run a few tests before everything was working, I was surprised though that our architecture did not need any changes.
-We ran the simulation and all the scenarios were passed. Now we started looking at the waveform and doublecheck our simulation.s
+We ran the simulation and all the scenarios were passed. Now we started looking at the waveform and doublecheck our simulations.
+
+### Entry � 2026-11-25
+**Commit reference:**  6c62deb`<!-- paste: git log --oneline -1 -->`
+
+**What I implemented or decided:**
+Checked the simulation and the waveform. Adjusted files to submission format.
+
+**What I am not sure about:**
+If we interpreted it in the right way. 
+
+**What the simulation or hardware told me I was wrong about:**
+<!-- Leave blank now. Fill in when you find out. Most important field. -->
+We misunderstood the front and back sensor. We thought the back sensor would be a sensor for a car behind but it turned out to be a sensor baehind the gate which activates when the car has passed through. So if both sensors are active we know that a new car is at the gate while the first one is passing through.
 
 ## Post-submission reflection
 
 **What worked and why:**
+We wrote down assumptions and interpretations of the task so we could work more structured and the communication in the group was easier. Separating the work because it was easier to focus working on one problem instead of doing all the tasks with everyone.
 
 **What I would change and why:**
 <!-- Be specific. Reference commit hashes. -->
+Consider the scenarios earlier and think of the testbench when doing the architecture for example in commit fe35f03ac89449ba47027d2e635a5df9d6279b6b. In general commit smaller changes and not only once for each lab so you can afterwards the different steps we went through.
 
 **What assumption did I carry in from the previous exercise that I had to revise here:**
 <!-- Required from Exercise 2 onward. -->
 
 **What part of this was my own contribution, and what did I learn from a teammate:**
+I worked on most of the exercise myself but it very helpful to discuss decisions with teammates and have someone doublecheck your work. Especially in the first part of getting to know the exercise.

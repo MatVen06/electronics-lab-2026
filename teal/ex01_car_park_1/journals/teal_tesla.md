@@ -26,6 +26,29 @@ the work flow, if it's better to do the TB as the first thing or as last or do i
 <!-- Leave blank now. Fill in when you find out. Most important field. -->
 
 ---
+### Entry — 2026-11-18
+**Commit reference:** `<!-- paste: git log --oneline -1 -->`
+
+**What I implemented or decided:**
+i've implemented the car_parking_system_VHD,
+i've started the implementation of the TB
+<!-- 2–4 sentences. Be specific about architecture choices. -->
+
+**Why I structured it this way:**
+at the beginning i was thinking that having as component also a prescaler and a led_block but than i changed my plan going for a single antity with no external component
+<!-- What alternatives did you consider? Why did you reject them? -->
+  
+**What I am not sure about:**
+i'm not sure about some parts of the Car_parking_systems like if i should put the password before or after counting the clocks, and if 'en_green_led' 'en_red_led' is actually needed and i'm talking about this with marco. i think we are going to remove them
+<!-- Honest uncertainty. Never graded for correctness — only for presence. -->
+
+**What the simulation or hardware told me I was wrong about:**
+<!-- Leave blank now. Fill in when you find out. Most important field. -->
+the compiler wasn't happy about the component prescaler and led_block so to make everything less complex i've removed it 
+
+---
+
+
 <!-- Copy the block above for each significant commit. -->
 
 ## Post-submission reflection

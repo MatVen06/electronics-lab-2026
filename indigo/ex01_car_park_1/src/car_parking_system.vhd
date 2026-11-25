@@ -27,12 +27,36 @@ architecture rtl of Car_Parking_System_VHDL is
   signal current_state : state_type;
   signal next_state    : state_type;
 
-  constant TRUE_PASSWORD : std_logic_vector(3 downto 0) := "1010"; -- password_1 & password_2
+  constant TRUE_PASSWORD : std_logic_vector(3 downto 0) := "0110"; -- password_1 & password_2
 
   -- tick counter: counts clock cycles spent in the current state
-  signal tick : natural range 0 to 255;
+  -- (4 bits, saturating: enough for the 10-cycle wait)
+  signal tick : natural range 0 to 15;
+  -- Blink signal toggles on every clock edge; drives the blinking LEDs
+  signal blink : std_logic;
 
-  signal stable : boolean := true; -- true if password is stable (not changing) for 1 clock cycle
+  -- password stability: previous password and number of clock cycles it has
+  -- not changed (saturating)
+  constant STABLE_CYCLES : natural := 10;
+  signal password_prev   : std_logic_vector(3 downto 0);
+  signal pw_stable_cnt   : natural range 0 to 15;
+
+  -- true when the correct password has been held stable for STABLE_CYCLES
+  signal password_ok : boolean;
+
+  signal state_code      : std_logic_vector(2 downto 0);
+  signal next_state_code : std_logic_vector(2 downto 0);
+
+  function encode(s : state_type) return std_logic_vector is
+  begin
+    case s is
+      when IDLE => return "000";
+      when WAIT_PASSWORD => return "001";
+      when WRONG_PASSWORD => return "010";
+      when RIGHT_PASSWORD => return "011";
+      when STOP => return "100";
+    end case;
+  end function;
 
   -- DISPLAY CONSTANTS
   constant HEX_OFF : std_logic_vector(6 downto 0) := "1111111";
@@ -45,18 +69,42 @@ architecture rtl of Car_Parking_System_VHDL is
 
 begin
 
+  -- debug mirrors of the FSM state as 3-bit codes (see encode()), because
+  -- GHDL does not dump enumeration signals to out.vcd; unused by the logic,
+  -- so synthesis removes them
+  state_code      <= encode(current_state);
+  next_state_code <= encode(next_state);
+
+  -- correct password, held stable for 10 clock cycles
+  -- (password = password_prev: the count belongs to the current password)
+  password_ok <= (password_1 & password_2) = TRUE_PASSWORD
+                 and password_prev = TRUE_PASSWORD
+                 and pw_stable_cnt >= STABLE_CYCLES;
+
   -- Clocked data path: state register + tick counter (asynchronous reset)
   DATA_PATH: process (clk, reset_n)
   begin
     if reset_n = '0' then
       current_state <= IDLE;
       tick <= 0;
+      blink <= '0';
+      password_prev <= (others => '0');
+      pw_stable_cnt <= 0;
     elsif rising_edge(clk) then
       current_state <= next_state;
+      blink <= not blink; -- toggles on every clock edge
+
+      -- count how long the password has been unchanged
+      password_prev <= password_1 & password_2;
+      if (password_1 & password_2) /= password_prev then
+        pw_stable_cnt <= 0; -- password changed: restart counting
+      elsif pw_stable_cnt < 15 then
+        pw_stable_cnt <= pw_stable_cnt + 1;
+      end if;
 
       if next_state /= current_state then
         tick <= 0; -- restart counting on every state change
-      elsif tick < 255 then
+      elsif tick < 15 then
         tick <= tick + 1;
       end if;
 
@@ -64,35 +112,30 @@ begin
   end process;
 
   -- Combinational FSM: next-state logic
-  FSM: process (current_state, front_sensor, back_sensor, password_1, password_2, tick)
+  FSM: process (current_state, front_sensor, back_sensor, tick, password_ok)
   begin
     next_state <= current_state; -- default: stay in the same state
     case current_state is
       when IDLE =>
         if front_sensor = '1' then
           next_state <= WAIT_PASSWORD;
-          stable <= true; -- password is stable at the beginning of WAIT_PASSWORD
         end if;
 
       when WAIT_PASSWORD =>
-        if password_1'event or password_2'event then
-          stable <= false; -- password is changing
-        else
-          if tick >= 10 then
-            if stable = true and (password_1 & password_2) = TRUE_PASSWORD then
-              next_state <= RIGHT_PASSWORD;
-            else
-              next_state <= WRONG_PASSWORD;
-            end if;
+        -- after 10 cycles: right only if the password was correct and stable
+        if tick >= 10 then
+          if password_ok then
+            next_state <= RIGHT_PASSWORD;
+          else
+            next_state <= WRONG_PASSWORD;
           end if;
         end if;
         if front_sensor = '0' then
           next_state <= IDLE;
         end if;
       when WRONG_PASSWORD =>
-        if tick >= 20 then
-          next_state <= WAIT_PASSWORD;
-          stable <= true; -- password is stable at the beginning of WAIT_PASSWORD
+        if password_ok then
+          next_state <= RIGHT_PASSWORD;
         end if;
         if front_sensor = '0' then
           next_state <= IDLE;
@@ -101,14 +144,20 @@ begin
         if back_sensor = '1' and front_sensor = '1' then
           next_state <= STOP;
         else
-          if back_sensor = '0' and tick >= 10 then
-            next_state <= IDLE;
+          if back_sensor = '1' then
+            next_state <= IDLE; -- car has passed the gate
           end if;
         end if;
 
       when STOP =>
+        -- wait for car 1 to clear the back sensor, then let car 2 in with the
+        -- correct password (or go back to IDLE if car 2 has gone away)
         if back_sensor = '0' then
-          next_state <= IDLE;
+          if password_ok then
+            next_state <= RIGHT_PASSWORD;
+          elsif front_sensor = '0' then
+            next_state <= IDLE;
+          end if;
         end if;
     end case;
   end process;
@@ -116,7 +165,7 @@ begin
   -----------------------------------------------------------------------------
   -- Combinational output logic
   -----------------------------------------------------------------------------
-  OUTPUTS: process (current_state, tick)
+  OUTPUTS: process (current_state, blink)
   begin
     -- defaults: LEDs off, displays off
     GREEN_LED <= '0';
@@ -133,27 +182,15 @@ begin
         HEX_1 <= HEX_E;
         HEX_2 <= HEX_n;
       when WRONG_PASSWORD =>
-        if (tick mod 2) = 0 then
-          RED_LED <= '1';
-        else
-          RED_LED <= '0';
-        end if;
+        RED_LED <= blink;
         HEX_1 <= HEX_E;
         HEX_2 <= HEX_E;
       when RIGHT_PASSWORD =>
-        if (tick mod 2) = 0 then
-          GREEN_LED <= '1';
-        else
-          GREEN_LED <= '0';
-        end if;
+        GREEN_LED <= blink;
         HEX_1 <= HEX_G;
         HEX_2 <= HEX_O;
       when STOP =>
-        if (tick mod 2) = 0 then
-          RED_LED <= '1';
-        else
-          RED_LED <= '0';
-        end if;
+        RED_LED <= blink;
         HEX_1 <= HEX_S;
         HEX_2 <= HEX_P;
 
