@@ -50,8 +50,8 @@ architecture Behavioral of Parking_Controller is
     -- Car counter
     signal car_count : integer range 0 to PARKING_CAPACITY := 0;
     -- Edge detection for sensors
-    signal sensor_A_Gin1_prev, sensor_B_Gin1_prev : std_logic;
-    -- ... (add for other gates)
+    signal sensor_A_Gin1_prev, sensor_B_Gin1_prev, sensor_A_Gin2_prev, sensor_B_Gin2_prev : std_logic;
+    signal sensor_A_Gout1_prev, sensor_B_Gout1_prev, sensor_A_Gout2_prev, sensor_B_Gout2_prev : std_logic;
     -- Increment/decrement flags
     signal inc_Gin1, inc_Gin2 : std_logic;
     signal dec_Gout1, dec_Gout2 : std_logic;
@@ -59,5 +59,39 @@ architecture Behavioral of Parking_Controller is
     signal payment_accepted_Gout1, payment_accepted_Gout2 : std_logic;
 begin
 
+    stateregister : process (clk, nrst)
+    begin
+        if nrst = '0' then
+            -- Reset all gate states to IDLE
+            state_Gin1 <= IDLE;
+            state_Gin2 <= IDLE;
+            state_Gout1 <= IDLE;
+            state_Gout2 <= IDLE;
+            
+            sensor_A_Gin1_prev <= '0';
+            sensor_B_Gin1_prev <= '0';
+            sensor_A_Gin2_prev <= '0';
+            sensor_B_Gin2_prev <= '0';
+            sensor_A_Gout1_prev <= '0';
+            sensor_B_Gout1_prev <= '0';
+            sensor_A_Gout2_prev <= '0';
+            sensor_B_Gout2_prev <= '0';
 
+        elsif rising_edge(clk) then
+            -- Advance current states to next states
+            state_Gin1 <= next_state_Gin1;
+            state_Gin2 <= next_state_Gin2;
+            state_Gout1 <= next_state_Gout1;
+            state_Gout2 <= next_state_Gout2;
+
+            sensor_A_Gin1_prev <= sensor_A_Gin1;
+            sensor_B_Gin1_prev <= sensor_B_Gin1;
+            sensor_A_Gin2_prev <= sensor_A_Gin2;
+            sensor_B_Gin2_prev <= sensor_B_Gin2;
+            sensor_A_Gout1_prev <= sensor_A_Gout1;
+            sensor_B_Gout1_prev <= sensor_B_Gout1;
+            sensor_A_Gout2_prev <= sensor_A_Gout2;
+            sensor_B_Gout2_prev <= sensor_B_Gout2;
+        end if;
+    end process stateregister;
 end architecture Behavioral;
