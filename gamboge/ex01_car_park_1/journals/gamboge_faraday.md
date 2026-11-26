@@ -63,6 +63,23 @@ I am not sure if using a buffer for the counter is the best idea. I find the log
 
 ---
 
+### Entry — 2026-11-26 
+**Commit reference:** [IMPL] Implementation of the testbench for scenario 1: normal entry. Test is passed without errors.
+
+**What I implemented or decided:**
+I decided to check if the system goes back to idle from the outputs of the leds and the display.
+
+
+**Why I structured it this way:**
+Because the state IDLE is the only with those specific outputs.
+
+**What I am not sure about:**
+I am not sure wheter it would be better to encode the states and put them into a register to check if we are in a certain state.
+
+**What the simulation or hardware told me I was wrong about:**
+<!-- Leave blank now. Fill in when you find out. Most important field. -->
+
+---
 ## Post-submission reflection
 
 **What worked and why:**
